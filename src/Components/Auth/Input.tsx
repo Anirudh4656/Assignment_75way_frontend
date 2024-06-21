@@ -32,7 +32,8 @@ const Input:React.FC<Input>= ({ name, handleChange, label, half, autoFocus, type
             </IconButton>
           </InputAdornment>
         ),
-      } : null}
+      } : undefined}
+      //why undefined
     />
   </Grid>
 );

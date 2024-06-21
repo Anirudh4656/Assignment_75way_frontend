@@ -1,10 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Auth from "./Components/Auth/userAuth"
+import App from "./App";
+import {Provider} from "react-redux";
+import { store } from "./Store/store";
 // Define the router configuration
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-  <Auth />
+    <Provider store={store}>
+    <App />
+    </Provider>
+ 
   </React.StrictMode>
 );
