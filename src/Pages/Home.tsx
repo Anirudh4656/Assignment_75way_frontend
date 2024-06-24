@@ -1,6 +1,7 @@
 import React from 'react'
 import GetDiscussion from "../Components/Discussion/getDiscussion";
 import Auth from "../Components/Auth/userAuth";
+import CreateDiscussion from "../Components/Discussion/createDiscusiion";
 const Home:React.FC = () => {
    interface Discussion {
     id: string;
@@ -12,9 +13,9 @@ const Home:React.FC = () => {
  
   return (
     <>
-    {/* <Auth /> */}
-    
-    <Auth />
+    <GetDiscussion />
+    <CreateDiscussion />
+  
     </>
   )
 }

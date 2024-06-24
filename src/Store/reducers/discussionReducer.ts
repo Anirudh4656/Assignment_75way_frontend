@@ -50,7 +50,14 @@ const discussionSlice=createSlice({
             state.error=action.payload;
             state.loading=false;
         },
+        postDiscussion:(
+            state,
+            action:PayloadAction<Discussion>
+        )=>{
+            state.discussions.push(action.payload)
+
+        }
     }
 })
-export const {  getDiscussion, setLoading,setError } = discussionSlice.actions;
+export const {  getDiscussion, setLoading,setError,postDiscussion } = discussionSlice.actions;
 export default discussionSlice.reducer;

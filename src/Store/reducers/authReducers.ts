@@ -47,5 +47,5 @@ const initialState:AuthState={
 
 export const { setUser, setLoading,setError } = authSlice.actions;
     
-
+//action creators
 export default authSlice.reducer;

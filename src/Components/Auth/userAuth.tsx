@@ -60,6 +60,8 @@ const dispatch = useDispatch<AppDispatch>();
         console.log(`in user ${isSignUp}` )
       dispatch(setLoading(true));
       const userLogin = await loginUser(form).unwrap();
+      localStorage.setItem('token', userLogin.data.accessToken);
+
       dispatch(setUser(userLogin));
       
       }

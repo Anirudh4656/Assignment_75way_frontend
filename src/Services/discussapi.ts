@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 interface Discussion {
+    [x: string]: any;
     id: string;
     title: string;
     content: string;
@@ -11,13 +12,23 @@ export const discussApi=createApi({
     endpoints:(builder)=>({
           getDiscussion:builder.query<Discussion,void>({
          query:()=>'/getDiscussion'
+          }),
+          createDiscussion:builder.mutation<Discussion,{title:string,content:string}>({
+            query:({title ,content})=>({
+                url:'/createDiscussion',
+                method:'POST',
+                body:{title,content}
+
+            })
           })
     })
 })
 
 export const {
-    useGetDiscussionQuery
+    useGetDiscussionQuery,
+    useCreateDiscussionMutation
 }=discussApi;
 // async onQueryStarted(arg, { dispatch, getState }) {
 //     await refreshTokenIfNeeded(dispatch, getState);
 // },  
+// localStorage.setItem('profile', JSON.stringify({ ...action?.data }));

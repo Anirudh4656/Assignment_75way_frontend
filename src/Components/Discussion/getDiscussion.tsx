@@ -8,10 +8,12 @@ const getDiscussion:React.FC = () => {
     user: string;
     // Add other fields as necessary
   }
+    //dispatch? not
   const { data: discussions, error, isLoading } = useGetDiscussionQuery();
-  console.log(discussions)
+  console.log(discussions);
   return (
     <>
+  
       <h1>getUserDiscussions</h1>
       {discussions && discussions.length > 0 ? (
         <ul>
