@@ -20,13 +20,22 @@ export const discussApi=createApi({
                 body:{title,content}
 
             })
+          }),
+          likeDiscussion:builder.mutation<Discussion,{id:string}>({
+            query:({id})=>({
+                url:'/likeDiscussion',
+                method:'POST',
+                body:{id}
+
+            })
           })
     })
 })
 
 export const {
     useGetDiscussionQuery,
-    useCreateDiscussionMutation
+    useCreateDiscussionMutation,
+    useLikeDiscussionMutation
 }=discussApi;
 // async onQueryStarted(arg, { dispatch, getState }) {
 //     await refreshTokenIfNeeded(dispatch, getState);
