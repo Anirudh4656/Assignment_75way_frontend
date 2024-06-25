@@ -25,7 +25,7 @@ const initialState:AuthState={
     error: null,
 }
 const adminSlice = createSlice({
-    name:"auth",
+    name:"admin",
     initialState,
     reducers:{ 
         getAllUsers:(state,

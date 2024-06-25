@@ -11,40 +11,44 @@ interface Token{
     _doc:any;
 }
 interface MyToken extends JwtPayload {
+    user: string;
     // Define your custom token properties here
     exp: number;
-     _doc:any;
+
     // add other properties your JWT token might have
   }
 const Navbar:React.FC=()=>{
    
     const [user, setUser] = useState<MyToken| null>(null);
+    console.log(`in navbar user ${JSON.stringify(user)}`);
     useEffect(() => {
         const token = localStorage.getItem("token");
-    
+    console.log(token);
         if (token) {
             try{
                 const decodedToken = jwtDecode<MyToken>(token);
                 console.log(`in decode ${JSON.stringify(decodedToken)}`);
+                //check
                 if (decodedToken.exp * 1000 < new Date().getTime()) {
                     logout();
                   } else {
                     setUser(decodedToken);
                   }
-            }catch(error){console.error('failed todecode',error)}
+            }catch(error){console.error('failed todecode',error)};
         
-      
     
-        //   if (decodedToken.exp * 1000 < new Date().getTime()) logout();
         }
         console.log("in user");
   
       
-      }, [location]);
+      }, []);
 
       const logout = () => {
         localStorage.removeItem('token');
         setUser(null);
+      }
+      const getDiscussion=()=>{
+          
       }
     return(
         <AppBar  position="static" color="inherit">
@@ -52,15 +56,16 @@ const Navbar:React.FC=()=>{
        Home 
         </Link>
         <Toolbar >
-          {/* {user?.result ? (
+          {user ? (
             <div >
-            
-              <Typography  variant="h6">{user?.result}</Typography>
+              <Typography  variant="h6">{user.user}</Typography>
               <Button variant="contained"  color="secondary" onClick={logout}>Logout</Button>
+              <Button variant="contained"  color="secondary" onClick={getDiscussion}>Discussions</Button>
             </div>
           ) : (
             <Button component={Link} to="/auth" variant="contained" color="primary">Sign In</Button>
-          )} */}
+          )}
+          
         </Toolbar>
       </AppBar>
     )

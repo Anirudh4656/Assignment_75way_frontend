@@ -28,7 +28,8 @@ export const adminApi=createApi({
                 method: 'PUT'
             })
               
-          })  
+          }),
+            
     })
 })
 

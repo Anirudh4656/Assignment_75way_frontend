@@ -1,16 +1,18 @@
 import {createSlice} from "@reduxjs/toolkit";
 import type {PayloadAction} from "@reduxjs/toolkit";
 
-interface Discuss{
-    title:string|null;
-    content:string |null;
-    user:string |null;
-}
+ interface Reply {
+    content: string;
+    user: string;
+    id:string;
+ }
 interface Discussion {
     id: string;
     title: string;
     content: string;
     user: string;
+    replies:Reply[];
+    likes:number;
   }
   
 interface DiscussState{
@@ -30,11 +32,19 @@ const discussionSlice=createSlice({
     reducers:{
         getDiscussion:(
         state,
-        action:PayloadAction<DiscussState>
+        action:PayloadAction<{discussions:Discussion[],userId?:string}>
         )=>{
-    return action.payload;
-     state.loading=false;
-     state.error=null;
+            const { discussions, userId } = action.payload;
+            console.log("in createslice",userId);
+            console.log("in createslice",discussions);
+            if (userId) {
+                state.discussions = discussions.filter(discussion => discussion.user === userId);
+              } else {
+                state.discussions = discussions;
+              }
+        
+              state.loading = false;
+              state.error = null;
    
         },
         setLoading:(
@@ -56,8 +66,28 @@ const discussionSlice=createSlice({
         )=>{
             state.discussions.push(action.payload)
 
+        },
+        likeDiscussions:(
+            state,
+            action:PayloadAction<{discussionId:string,userId:string}>
+        )=>{
+            const {discussionId,userId}=action.payload;
+            const discussion= state.discussions.find((discussion)=>discussion.id===discussionId)
+            if (discussion) {
+                discussion.likes += 1;
+              }
+        },
+        replyDiscussion:(
+            state,
+            action:PayloadAction<{discussionId:string,content:Reply}>
+        )=>{
+            const {discussionId,content}=action.payload;
+            const discussion= state.discussions.find((discussion)=>discussion.id===discussionId);
+            if (discussion) {
+                discussion.replies.push(content);
+              }
         }
     }
 })
-export const {  getDiscussion, setLoading,setError,postDiscussion } = discussionSlice.actions;
+export const {  getDiscussion, setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
 export default discussionSlice.reducer;

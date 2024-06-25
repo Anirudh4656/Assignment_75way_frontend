@@ -28,6 +28,13 @@ export const discussApi=createApi({
                 body:{id}
 
             })
+          }),
+          addReply:builder.mutation<Discussion,{discussionId:string,content:string}>({
+            query:({discussionId,content })=>({
+                url:`/replyDiscussion/${discussionId}`,
+                method:"POST",
+                body:{discussionId,content}
+            }) 
           })
     })
 })
@@ -35,7 +42,8 @@ export const discussApi=createApi({
 export const {
     useGetDiscussionQuery,
     useCreateDiscussionMutation,
-    useLikeDiscussionMutation
+    useLikeDiscussionMutation,
+    useAddReplyMutation
 }=discussApi;
 // async onQueryStarted(arg, { dispatch, getState }) {
 //     await refreshTokenIfNeeded(dispatch, getState);
