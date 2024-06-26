@@ -29,8 +29,15 @@ export const adminApi=createApi({
             })
               
           }),
+          deleteUser:builder.mutation<User,BlockUserPayload>({
+            query:({userId})=>({
+                  url:`/deleteUser/${userId}`,
+                method: 'PUT'
+            })
+              
+          })
             
     })
 })
 
-export  const { useGetAllUserQuery,useBlockUserMutation} = adminApi;
+export  const { useGetAllUserQuery,useBlockUserMutation,useDeleteUserMutation} = adminApi;

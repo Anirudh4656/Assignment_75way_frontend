@@ -6,13 +6,16 @@ import type {PayloadAction} from "@reduxjs/toolkit";
     user: string;
     id:string;
  }
+ interface Like{
+    id:string;
+ }
 interface Discussion {
     id: string;
     title: string;
     content: string;
     user: string;
     replies:Reply[];
-    likes:number;
+    likes:Like[];
   }
   
 interface DiscussState{
@@ -30,7 +33,7 @@ const discussionSlice=createSlice({
     name:'discuss',
     initialState,
     reducers:{
-        getDiscussion:(
+        getDiscussions:(
         state,
         action:PayloadAction<{discussions:Discussion[],userId?:string}>
         )=>{
@@ -73,21 +76,23 @@ const discussionSlice=createSlice({
         )=>{
             const {discussionId,userId}=action.payload;
             const discussion= state.discussions.find((discussion)=>discussion.id===discussionId)
-            if (discussion) {
-                discussion.likes += 1;
-              }
+         
         },
         replyDiscussion:(
             state,
             action:PayloadAction<{discussionId:string,content:Reply}>
         )=>{
             const {discussionId,content}=action.payload;
-            const discussion= state.discussions.find((discussion)=>discussion.id===discussionId);
-            if (discussion) {
-                discussion.replies.push(content);
+            console.log("in dispatch reply discussion",content);
+            const discussion= state.discussions.find((discussion:Discussion)=>discussion.id===discussionId);
+            console.log("in discussion before",discussion);
+            if(discussion) {
+             
+                discussion.replies = [...discussion.replies, content];
+                console.log("in discussion after",discussion.replies);
               }
         }
     }
 })
-export const {  getDiscussion, setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
+export const {  getDiscussions, setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
 export default discussionSlice.reducer;

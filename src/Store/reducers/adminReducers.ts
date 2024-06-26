@@ -5,7 +5,7 @@ interface User {
     email: string;
     user:string;
     isBlocked:boolean;
- 
+   id:string;
   }
 
 interface AuthState{
@@ -17,6 +17,7 @@ interface AuthState{
 }
 interface BlockUserPayload {
     userId: string;
+    blocked:boolean;
   }
 const initialState:AuthState={
     users:[],
@@ -30,20 +31,30 @@ const adminSlice = createSlice({
     reducers:{ 
         getAllUsers:(state,
             action:PayloadAction<User[]>
-        )=>{
+        )=>{ 
             state.user=action.payload
         },
         blockUsers:(state,
             action:PayloadAction<BlockUserPayload>
         )=>{
+            const {userId,blocked} = action.payload;
+            // const user =state?.users.map((u:any)=>u.id===userId);
+            // if(user){
+            //     user._id === id ? { ...user, blocked: blocked } : user
+            // }
+            state.users = state.users.map((user:any) =>
+                user.id === userId ? { ...user, blocked: blocked } : user
+                 );
+        },
+        deleteUsers:(state,
+            action:PayloadAction<{userId:string}>
+        )=>{
             const {userId} = action.payload;
-            const user =state?.users.find((u:any)=>u.id===userId);
-            if(user){
-                user.isBlocked=true;
-            }
+  state.users = state.users.filter(user => user.id !== userId);
+           
         }
     }
 })
 
-export const {getAllUsers,blockUsers}=adminSlice.actions;
+export const {getAllUsers,blockUsers,deleteUsers}=adminSlice.actions;
 export default adminSlice.reducer;

@@ -1,19 +1,28 @@
 import React, { Key, useEffect, useState } from 'react'
 import { useGetDiscussionQuery, useLikeDiscussionMutation } from '../../Services/discussapi'
-import Reply from "./reply"
+import ReplySection from "./reply"
 import { AppDispatch } from "../../Store/store";
 import { useDispatch } from "react-redux";
-import { Button } from '@mui/material';
-import { likeDiscussions} from '../../Store/reducers/discussionReducer';
-
-interface Discussion {
-  _id: string;
+import { Button, List, ListItem, ListItemText, TextField } from '@mui/material';
+import { getDiscussions, likeDiscussions} from '../../Store/reducers/discussionReducer';
+ interface Reply {
+  content: string;
+  user: string;
+  id: string;
+}
+interface Like{
+  id:string;
+}
+ interface Discussion {
+  _id:string;
   id: string;
   title: string;
   content: string;
   user: string;
-  // Add other fields as necessary
+  replies: Reply[];
+  likes: Like[];
 }
+//isAdmin to show close button and can close it 
 const getDiscussion:React.FC = () => {
   const { data: discussions, error, isLoading } = useGetDiscussionQuery();
   useEffect(()=>{
@@ -21,19 +30,34 @@ const getDiscussion:React.FC = () => {
     const fetchDiscussions = async ()=>{
       try{
         if(discussions){
-  
-          console.log("ingetdiscuss",discussions);
-          // dispatch(getDiscussion(discussions));
+    
+          // console.log("ingetdiscuss",discussions);
+          const transformedDiscussions: Discussion[] = discussions.map((discussion: any) => ({
+            id: discussion._id,
+            title: discussion.title,
+            content: discussion.content,
+            user: discussion.user,
+            replies: discussion.replies.map((reply: any) => ({
+              content: reply.content,
+              user: reply.user,
+              id: reply._id
+            })),
+            likes: discussion.likes.length // Assuming likes is an array of user ids
+          }));
+
+          // Dispatch the getDiscussion action with transformed discussions
+          dispatch(getDiscussions({ discussions: transformedDiscussions }));
+      
         }else{
           console.log("error");
         }
       }catch(error:any){
-        console.log("ingetdiscuss");
+
         console.log("erroris",error.message);
       }
     }
     fetchDiscussions();
-   },[])
+   },[discussions])
    //dispatch? not 
    const dispatch=useDispatch<AppDispatch>();
 
@@ -57,23 +81,39 @@ console.log(like);
   
       <h1>getUserDiscussions</h1>
       {discussions && discussions.length > 0 ? (
-        <ul>
-          {discussions.map((discussion: Discussion) => (
+        // <ul>
+        //   {discussions.map((discussion: Discussion) => (
           
-            <li key={discussion._id}>
-              <h2>{discussion.title}</h2>
-              <p>{discussion.content}</p>
-              <Button size="small" color="primary"  onClick={()=>handleLike(discussion._id)}>
-         like
-        </Button> 
-              {/* <Button size="small" color="primary" disabled={!user?.result} onClick={handleLike}>
-          <Likes />
-        </Button> */}
-              <Reply  discussionId={discussion._id}/>
-              {/* <p>By: {discussion.user.username}</p> */}
-            </li>
-          ))}
-        </ul>
+        //     <li key={discussion._id}>
+        //       <h2>{discussion.title}</h2>
+        //       <p>{discussion.content}</p>
+        //       <Button size="small" color="primary"  onClick={()=>handleLike(discussion._id)}>
+        //  like
+        // </Button> 
+        //       {/* <Button size="small" color="primary" disabled={!user?.result} onClick={handleLike}>
+        //   <Likes />
+        // </Button> */}
+        //       <ReplySection  discussionId={discussion._id}/>
+        //       {/* <p>By: {discussion.user.username}</p> */}
+        //     </li>
+        //   ))}
+        // </ul>
+        <List>
+        {discussions.map((discussion:Discussion)=> (
+          <ListItem key={discussion.id}>
+            <ListItemText primary={discussion.title} secondary={discussion.content} />
+            <Button onClick={() => handleLike(discussion.id)}>Like </Button>
+            <ReplySection  discussionId={discussion._id}/>
+            <List>
+              {discussion.replies.map(reply => (
+                <ListItem key={reply.id}>
+                  <ListItemText primary={reply.content} secondary={reply.user} />
+                </ListItem>
+              ))}
+            </List>
+          </ListItem>
+        ))}
+      </List>
       ) : (
         <p>No discussions found.</p>
       )}

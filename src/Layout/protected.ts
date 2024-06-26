@@ -52,7 +52,7 @@ const Protected:React.FC<ProtectedProps> = ({auth,  children }) => {
   // Render children only if user is authenticated
  return(
     <>
-   {children}
+   {loader? null: {children}}
   </>
  )
 

@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ThemeProvider } from "@mui/material";
 // import theme from "./themes";
 import {createBrowserRouter, RouterProvider} from "react-router-dom"
 import Auth from "./Components/Auth/userAuth";
@@ -18,14 +17,12 @@ const router = createBrowserRouter([
     path:"/auth",
     element:<Auth />
   },
-  // {
-  //   path:'/admin',
-  //   element: (
-  //     <Protected auth = {true}>
-  //       <Admin />
-  //     </Protected>
-  //   )
-  // }
+  {
+    path:'/admin',
+    element: (
+        <Admin />
+    )
+  }
 ]);
 function App(){
   return(

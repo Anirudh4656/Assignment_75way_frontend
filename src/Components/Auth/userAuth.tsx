@@ -1,14 +1,14 @@
 import { Avatar, Button, Container, Grid, Paper, Typography,Theme, useTheme, Box } from '@mui/material';
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 // import { styled } from '@mui/material/styles';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+// import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 // import useStyles from './styles';
 import Input from './Input';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../Store/store';
 import { setError, setLoading, setUser } from '../../Store/reducers/authReducers';
 import { useLoginUserMutation, useRegisterUserMutation } from '../../Services/api';
-
+import { useNavigate } from 'react-router-dom';
 interface FormState {
     username:string
     email: string;
@@ -19,7 +19,7 @@ interface FormState {
   const initialState: FormState = { username:'', email: '', password: ''};
 
   const UserAuth:React.FC=()=>{
-
+    const navigate = useNavigate();
     const theme=useTheme();
 // const classes = useStyle(theme);
 const [form,setForm]=useState<FormState>(initialState);
@@ -37,35 +37,25 @@ const switchMode=()=>{
   setShowPassword(false);
   setForm(initialState);
 }
-// const handleSubmit = (e:FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-// //  logic for datafetching
-//     // if (isSignup) {
-//     //   dispatch(signup(form, history));
-//     // } else {
-//     //   dispatch(signin(form, history));
-//     // }
-//   };
 const dispatch = useDispatch<AppDispatch>();
   const handleSubmit = async (e:FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      //logic for is signup
-    
       if(isSignUp){
         dispatch(setLoading(true));
         const userRegister = await registerUser(form).unwrap();
-        dispatch(setUser(userRegister));
+        if(userRegister){
+          setIsSignUp(false);
+          setForm(initialState);
+          dispatch(setUser(userRegister));
+        }
       }else{
-        console.log(`in user ${isSignUp}` )
       dispatch(setLoading(true));
       const userLogin = await loginUser(form).unwrap();
       localStorage.setItem('token', userLogin.data.accessToken);
-
       dispatch(setUser(userLogin));
-      
+      navigate('/');
       }
-     
     } catch (error:any) {
       dispatch(setError(error.toString()));
     } finally {
@@ -78,7 +68,7 @@ return(
         <Paper sx={ {marginTop: theme.spacing(8), display: 'flex',flexDirection: 'column',alignItems: 'center',padding: theme.spacing(2)}}>
             <Avatar sx={ {margin: theme.spacing(1),
                     backgroundColor: theme.palette.secondary.main}}>
-           <LockOutlinedIcon />
+           {/* <LockOutlinedIcon /> */}
             </Avatar>
             <Typography component="h1" variant="h5">{ isSignUp ? 'Sign up' : 'Sign in' }</Typography>
             <Box sx={{width: '100%',marginTop: theme.spacing(3)}} >
@@ -86,7 +76,7 @@ return(
             <Grid container spacing={2}>
             { isSignUp && (
             <>
-              <Input name="username" label="First Name" handleChange={handleChange} autoFocus half type={undefined} handleShowPassword={undefined} />
+              <Input name="username" label="username" handleChange={handleChange} autoFocus half={undefined} type={undefined} handleShowPassword={undefined} />
               {/* <Input name="lastName" label="Last Name" handleChange={handleChange} half autoFocus={undefined} type={undefined} handleShowPassword={undefined} /> */}
             </>
             )}

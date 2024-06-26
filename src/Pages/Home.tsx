@@ -4,6 +4,7 @@ import Auth from "../Components/Auth/userAuth";
 import NavBar from "./Navbar";
 import CreateDiscussion from "../Components/Discussion/createDiscusiion";
 import { Container, Grid } from '@mui/material';
+import RecipeReviewCard from "../Components/Discussion/card"
 const Home:React.FC = () => {
    interface Discussion {
     id: string;
@@ -16,8 +17,9 @@ const Home:React.FC = () => {
   return (
     <>
    
-    <NavBar />
-    <Container maxWidth="xl">
+    <NavBar/>
+  <RecipeReviewCard/>
+    {/* <Container maxWidth="xl">
     <Grid container  spacing={3}>
           <Grid item xs={12} sm={6} md={9}>
           <GetDiscussion />
@@ -26,7 +28,7 @@ const Home:React.FC = () => {
        <CreateDiscussion />
     </Grid>
      </Grid>
-    </Container>
+    </Container> */}
   
     </>
   )

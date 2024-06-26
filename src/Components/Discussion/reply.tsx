@@ -14,7 +14,19 @@ interface LikeButtonProps {
  }
  
   
- 
+
+interface Like{
+  id:string;
+}
+ interface Discussion {
+  _id:string;
+  id: string;
+  title: string;
+  content: string;
+  user: string;
+  replies: Reply[];
+  likes: Like[];
+}
   
 const Reply:React.FC<LikeButtonProps>=({discussionId})=>{
 const [content ,setContent] =useState<string>("")
@@ -23,12 +35,12 @@ const [addReply]=useAddReplyMutation();
 const dispatch=useDispatch<AppDispatch>();
 
 //state->discuss->discussions(find method )
-const discussions = useAppSelector((state: RootState) => state.discuss.discussions);
-// const discussion = useAppSelector((state: RootState) =>
-//     state.discuss.discussions.find(discussion => discussion.id === discussionId)
-//   );
+// const discussion=useAppSelector((state: RootState) => state.discuss.discussions)
+const discussion = useAppSelector((state: RootState) =>
+    state.discuss.discussions.find(discussion => discussion.id === discussionId)
+  );
+console.log("in discussion use selector",discussion);
 
-//   console.log("in discussion use selector",discussions);
     const handleSubmit=async(e:FormEvent<HTMLFormElement>)=>{
         e.preventDefault();
 
@@ -36,15 +48,15 @@ const discussions = useAppSelector((state: RootState) => state.discuss.discussio
             //error handling
             const response =await addReply({content,discussionId});
             if (response.data) {
-                // Accessing fields within response.data
                 const reply: Reply = {
-                  content: response.data.content,
-                  user: response.data.user,
-                  id: response.data._id
+                  content: response.data.data.content,
+                  user: response.data.data.user,
+                  id: response.data.data._id
                 };
 
-                console.log("reply",reply);
+          
                      dispatch(replyDiscussion({discussionId,content:reply}));
+              
             }else {
                 console.error('Response data is undefined', response.error);
               }
@@ -53,11 +65,18 @@ const discussions = useAppSelector((state: RootState) => state.discuss.discussio
     }
     return (
     <>
-     <form autoComplete="off" noValidate  onSubmit={handleSubmit}>
-        <TextField name="content" variant="outlined" label="reply" fullWidth value={content} onChange={(e)=>setContent(e.target.value)} />
-       <Button  variant="contained" color="primary" size="large" type="submit" fullWidth>Submit</Button>
-    //     {/* <Button variant="contained" color="secondary" size="small" onClick={clear} fullWidth>Clear</Button> */}
-  </form>
+    {discussion?.replies && discussion.replies.map((reply:Reply)=>{
+       <div key={reply.id}>
+        <h1> hello</h1>
+       </div>
+  })} 
+
+  {}
+    
+  <form onSubmit={handleSubmit}>
+  <TextField name="content" variant="outlined" label="reply" fullWidth value={content} onChange={(e)=>setContent(e.target.value)} />
+            <Button type="submit">Submit</Button>
+          </form>
      </>);
 }
 
