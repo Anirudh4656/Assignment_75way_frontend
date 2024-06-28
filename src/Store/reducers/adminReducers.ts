@@ -29,10 +29,10 @@ const adminSlice = createSlice({
     name:"admin",
     initialState,
     reducers:{ 
-        getAllUsers:(state,
+        setUsers:(state,
             action:PayloadAction<User[]>
         )=>{ 
-            state.user=action.payload
+            state.users=action.payload
         },
         blockUsers:(state,
             action:PayloadAction<BlockUserPayload>
@@ -56,5 +56,5 @@ const adminSlice = createSlice({
     }
 })
 
-export const {getAllUsers,blockUsers,deleteUsers}=adminSlice.actions;
+export const {setUsers,blockUsers,deleteUsers}=adminSlice.actions;
 export default adminSlice.reducer;

@@ -22,12 +22,14 @@ interface DiscussState{
     discussions:Discussion[];
     loading:boolean;
     error:string | null;
+    filterUserId:string | null
 
 }
 const initialState:DiscussState={
   discussions:[],
   loading:false,
-  error:null
+  error:null,
+  filterUserId:null
 }
 const discussionSlice=createSlice({
     name:'discuss',
@@ -35,21 +37,21 @@ const discussionSlice=createSlice({
     reducers:{
         getDiscussions:(
         state,
-        action:PayloadAction<{discussions:Discussion[],userId?:string}>
+        action:PayloadAction<{discussions:Discussion[]}>
         )=>{
-            const { discussions, userId } = action.payload;
-            console.log("in createslice",userId);
-            console.log("in createslice",discussions);
-            if (userId) {
-                state.discussions = discussions.filter(discussion => discussion.user === userId);
-              } else {
+            const { discussions} = action.payload;
+           
                 state.discussions = discussions;
-              }
         
               state.loading = false;
               state.error = null;
+              state.filterUserId=null;
    
         },
+        setFilterUserId: (state, action: PayloadAction<string | null>) => {
+            console.log("action payload",action.payload);
+            state.filterUserId = action.payload;
+          },
         setLoading:(
             state,
             action:PayloadAction<boolean>
@@ -67,32 +69,45 @@ const discussionSlice=createSlice({
             state,
             action:PayloadAction<Discussion>
         )=>{
-            state.discussions.push(action.payload)
+
+            return {
+                ...state,
+                discussions: [...state.discussions, action.payload],
+              };
 
         },
         likeDiscussions:(
             state,
             action:PayloadAction<{discussionId:string,userId:string}>
         )=>{
-            const {discussionId,userId}=action.payload;
-            const discussion= state.discussions.find((discussion)=>discussion.id===discussionId)
-         
+
+            const { discussionId, userId } = action.payload;
+            const discussion = state.discussions.find(d => d.id === discussionId);
+            if (discussion) {
+              const userLikeIndex = discussion.likes.findIndex(like => like.id === userId);
+              if (userLikeIndex === -1) {
+                discussion.likes.push({ id: userId });
+              } else {
+                discussion.likes.splice(userLikeIndex, 1);
+              }
+            }
+         console.log("like reducer",state);
         },
         replyDiscussion:(
             state,
             action:PayloadAction<{discussionId:string,content:Reply}>
         )=>{
             const {discussionId,content}=action.payload;
-            console.log("in dispatch reply discussion",content);
-            const discussion= state.discussions.find((discussion:Discussion)=>discussion.id===discussionId);
-            console.log("in discussion before",discussion);
-            if(discussion) {
+            console.log("in dispatch reply discussion",discussionId,"f",content);
+            const discussio= state.discussions.find((discussion:Discussion)=>discussion.id===discussionId);
+         console.log("discussio",discussio);
+            if(discussio) {
              
-                discussion.replies = [...discussion.replies, content];
-                console.log("in discussion after",discussion.replies);
+                discussio.replies = [...discussio.replies, content];
+
               }
         }
     }
 })
-export const {  getDiscussions, setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
+export const {  getDiscussions,  setFilterUserId,setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
 export default discussionSlice.reducer;

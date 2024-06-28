@@ -1,8 +1,5 @@
 import { Avatar, Button, Container, Grid, Paper, Typography,Theme, useTheme, Box } from '@mui/material';
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-// import { styled } from '@mui/material/styles';
-// import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-// import useStyles from './styles';
 import Input from './Input';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../Store/store';
@@ -33,9 +30,10 @@ const [loginUser]=useLoginUserMutation();
 
 const handleChange = (event: ChangeEvent<HTMLInputElement>) => setForm({ ...form, [event.target.name]: event.target.value });
 const switchMode=()=>{
+  setForm(initialState);
   setIsSignUp((prevIsSignUp)=>!prevIsSignUp);
   setShowPassword(false);
-  setForm(initialState);
+  
 }
 const dispatch = useDispatch<AppDispatch>();
   const handleSubmit = async (e:FormEvent<HTMLFormElement>) => {

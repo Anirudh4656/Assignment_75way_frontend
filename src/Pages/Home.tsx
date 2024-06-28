@@ -18,17 +18,17 @@ const Home:React.FC = () => {
     <>
    
     <NavBar/>
-  <RecipeReviewCard/>
-    {/* <Container maxWidth="xl">
+ 
+    <Container maxWidth="xl">
     <Grid container  spacing={3}>
-          <Grid item xs={12} sm={6} md={9}>
-          <GetDiscussion />
+          <Grid  item xs={12} sm={6} md={9} sx={{display:"flex",flexWrap:'wrap'}}>
+          <RecipeReviewCard/>
           </Grid>
           <Grid item xs={12} sm={6} md={3}> 
        <CreateDiscussion />
     </Grid>
      </Grid>
-    </Container> */}
+    </Container>
   
     </>
   )

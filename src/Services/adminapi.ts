@@ -35,9 +35,15 @@ export const adminApi=createApi({
                 method: 'PUT'
             })
               
+          }),
+          close:builder.mutation<User,{id:string}>({
+            query:({id})=>({
+              url:`/closeDiscussion/${id}`,
+            method: 'PATCH'
+        })
           })
             
     })
 })
 
-export  const { useGetAllUserQuery,useBlockUserMutation,useDeleteUserMutation} = adminApi;
+export  const { useGetAllUserQuery,useBlockUserMutation,useDeleteUserMutation,useCloseMutation} = adminApi;

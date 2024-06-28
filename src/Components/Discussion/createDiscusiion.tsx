@@ -43,13 +43,15 @@ if (newDiscussion.data) {
         content: newDiscussion.data.data.content,
         id: newDiscussion.data.data._id,
         title: newDiscussion.data.data.title,
-        user: newDiscussion.data.data.user,
+        user: "123",
         likes:newDiscussion.data.data.likes,
         replies:newDiscussion.data.data.replies
     };
-
-
+  
 dispatch(postDiscussion(newDiscuss));
+setPostData(initialState)
+   
+
     }  } catch(error){console.log(error)}
 
 // console.log(newDiscussion.data);

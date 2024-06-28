@@ -23,8 +23,8 @@ export const discussApi=createApi({
           }),
           likeDiscussion:builder.mutation<Discussion,{id:string}>({
             query:({id})=>({
-                url:'/likeDiscussion',
-                method:'POST',
+                url:`/likeDiscussion/${id}`,
+                method:'PATCH',
                 body:{id}
 
             })
@@ -32,7 +32,7 @@ export const discussApi=createApi({
           addReply:builder.mutation<Discussion,{discussionId:string,content:string}>({
             query:({discussionId,content })=>({
                 url:`/replyDiscussion/${discussionId}`,
-                method:"POST",
+                method:"PATCH",
                 body:{discussionId,content}
             }) 
           })

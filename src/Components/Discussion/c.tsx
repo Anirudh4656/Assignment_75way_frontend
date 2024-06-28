@@ -77,12 +77,11 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   }),
 }));
 
-const  RecipeReviewCard: () => JSX.Element=()=> {
+const  Card: () => JSX.Element=()=> {
   const [expanded, setExpanded] = React.useState(false);
   const [user, setUser] = useState<MyToken| null>(null);
   const [content ,setContent] =useState<string>("")
   const [role,setRole] =useState<boolean>(false);
-  const[likes,setLikes]=useState<Like[]>()
   const [addReply]=useAddReplyMutation();
   const { data: discussions, error, isLoading } = useGetDiscussionQuery();
   const [close]=useCloseMutation();
@@ -177,57 +176,36 @@ const handleSubmit=async(id: string)=>{
 }
 
 
-const handleLike = async (id: string) => {
-  const discussions = discussion.find(discussion => discussion.id === id);
-  if (discussions) {
-    const hasLikedPost = discussions.likes.some(like => like.id === id);
-    if (hasLikedPost) {
-      // Handle unlike logic here
-      const newLikes = discussions.likes.filter(like => like.id !== id);
-      setLikes(newLikes);
-      // Dispatch an action to update the likes in the Redux store if necessary
-    } else {
-      // Handle like logic here
-      try{
-      const like= await likeDiscussion({id:id});
+
+const handleLike=async(id: string)=>{
+  //check
+  const hasLikedPost = discussion.map((discussion)=>{ return discussion.likes.find((like)=>like.toString()===id)})
+    console.log(`in handle like  ${id}`);
+
+   try{
+    const like= await likeDiscussion({id:id});
     if(like.data){
       //
       const user=like.data.data._id;
       console.log("in like",like.data.data._id);
       dispatch(likeDiscussions({discussionId:id ,userId:user}));
-    } }catch(e){
-      console.log(e);
+      // if (hasLikedPost) {
+      //   setLikes(post.likes.filter((id) => id !== userId));
+      // } else {
+      //   setLikes([...post.likes, userId]);
+      // }
     }
-  }}}
-// const handleLike=async(id: string)=>{
-//   //check
-//   const hasLikedPost = discussion.map((discussion)=>{ return discussion.likes.find((like)=>like.toString()===id)})
-//     console.log(`in handle like  ${id}`);
 
-//    try{
-//     const like= await likeDiscussion({id:id});
-//     if(like.data){
-//       //
-//       const user=like.data.data._id;
-//       console.log("in like",like.data.data._id);
-//       dispatch(likeDiscussions({discussionId:id ,userId:user}));
-//       if (hasLikedPost) {
-//         setLikes(discussion.map((discussion)=>discussion.likes.filter((id:any) => id !== id)));
-//       } 
-//     }
-//     }
-
-//    }catch(e){console.log(e)}
+   }catch(e){console.log(e)}
 
 
 
-//   };
+  };
  const handleClose=async(id: string)=>{
   const closed= await close({id:id});
   console.log("in hadle clse",closed);
  }
-  const Likes = () => { 
-    return (<> </>)
+  const Likes = () => {
     // if (likes.length > 0) {
     //   return likes.find((like) => like === userId)
     //     ? (
@@ -267,7 +245,7 @@ const handleLike = async (id: string) => {
             </CardContent>
             <CardActions disableSpacing>
               {role ? (  <> <IconButton  onClick={()=>handleLike(discussion.id)} aria-label="add to favorites">
-               
+                like
                
               </IconButton>
               <IconButton  onClick={()=>handleClose(discussion.id)} aria-label="add to favorites">
@@ -331,4 +309,4 @@ const handleLike = async (id: string) => {
    </>
   );
 }
-export default  RecipeReviewCard
+export default  Card
