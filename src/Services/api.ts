@@ -9,7 +9,7 @@ interface User {
     isAdmin: boolean;
     blocked: boolean;
   }
-
+const token= localStorage.getItem('token');
 export const userApi= createApi({
     reducerPath:"api",
     baseQuery:fetchBaseQuery(
@@ -20,6 +20,9 @@ export const userApi= createApi({
                   url: '/signin',
                   method: 'POST',
                   body: { email, password },
+                  headers: {
+                    'Authorization': `Bearer ${token}`
+                }
                 }),
               }),
               registerUser: builder.mutation<User, { username: string; email: string; password: string }>({

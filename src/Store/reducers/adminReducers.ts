@@ -25,14 +25,16 @@ const initialState:AuthState={
     loading: false,
     error: null,
 }
+
 const adminSlice = createSlice({
     name:"admin",
     initialState,
     reducers:{ 
         setUsers:(state,
-            action:PayloadAction<User[]>
+            action:PayloadAction<{user:User[]}>
         )=>{ 
-            state.users=action.payload
+            const { user} = action.payload;
+            state.users=user
         },
         blockUsers:(state,
             action:PayloadAction<BlockUserPayload>

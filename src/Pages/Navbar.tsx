@@ -53,7 +53,7 @@ const Navbar:React.FC=()=>{
   //??
           console.log('in getDi555scussion',user);
           if(user){
-            console.log('user',user.id)
+            console.log('in getDiscussion user',user)
           dispatch(setFilterUserId(user.id));}
       }
     return(

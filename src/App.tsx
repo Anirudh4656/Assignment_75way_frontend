@@ -4,7 +4,7 @@ import ReactDOM from "react-dom/client";
 import {createBrowserRouter, RouterProvider} from "react-router-dom"
 import Auth from "./Components/Auth/userAuth";
 import Home from "./Pages/Home";
-import Admin from "./Components/Admin/AllUsers";
+import Admin from "./Components/Admin";
 import Protected from "./Layout/protected";
 
 // Define the router configuration

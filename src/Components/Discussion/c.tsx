@@ -2,9 +2,9 @@ import React ,{ Key, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
@@ -12,40 +12,28 @@ import BlockIcon from '@mui/icons-material/Block';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { JSX } from 'react/jsx-runtime';
-import { InputAdornment, InputLabel, List, ListItem, ListItemText, OutlinedInput, TextField } from '@mui/material';
+import { InputAdornment, List, ListItem, ListItemText, OutlinedInput } from '@mui/material';
 import { useGetDiscussionQuery, useLikeDiscussionMutation } from '../../Services/discussapi'
 import { useCloseMutation } from '../../Services/adminapi';
-import ReplySection from "./reply"
-
 import { Button } from '@mui/material';
 import { getDiscussions, likeDiscussions} from '../../Store/reducers/discussionReducer';
-
 import { replyDiscussion} from '../../Store/reducers/discussionReducer';
 import { useAddReplyMutation } from '../../Services/discussapi'
 import { AppDispatch, RootState, useAppSelector } from "../../Store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { JwtPayload, jwtDecode } from 'jwt-decode';
 
-interface LikeButtonProps {
-    discussionId: string;
-  }
- 
 interface Like{
   id:string;
 }
 interface MyToken extends JwtPayload {
   role: any;
   user: string;
-  // Define your custom token properties here
   exp: number;
   _doc:any;
   _id:string;
-  // add other properties your JWT token might have
 }
  interface Discussion {
   _id:string;
@@ -76,18 +64,25 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
     duration: theme.transitions.duration.shortest,
   }),
 }));
-
-const  Card: () => JSX.Element=()=> {
+interface DiscussProps {
+  discuss: any; // Adjust 'any' to the actual type of 'discuss' prop
+}
+const  Cards:React.FC<DiscussProps>=({discuss})=> { 
   const [expanded, setExpanded] = React.useState(false);
   const [user, setUser] = useState<MyToken| null>(null);
   const [content ,setContent] =useState<string>("")
-  const [role,setRole] =useState<boolean>(false);
+  const [role,setRole] =useState<boolean>(true);
   const [addReply]=useAddReplyMutation();
   const { data: discussions, error, isLoading } = useGetDiscussionQuery();
   const [close]=useCloseMutation();
   const dispatch=useDispatch<AppDispatch>();
+  const discussion = useSelector((state: RootState) => state.discuss.discussions);
+  console.log("in use selector replies",discussion);
+  const filterUserId = useSelector((state: RootState) => state.discuss);
+  console.log("in use selector replies filter",filterUserId);
   //why discussions
   useEffect(()=>{
+    console.log("in use selector replies filter",filterUserId);
 
     fetchDiscussions();
     const token = localStorage.getItem('token');
@@ -99,6 +94,7 @@ if (token) {
       //check
     
           setUser(decodedToken);
+          console.log("inuser",decodedToken);
           if(decodedToken.role==="ADMIN"){
             setRole(true);
           }
@@ -112,17 +108,16 @@ if (token) {
   };
  
  
-  const discussion = useSelector((state: RootState) => state.discuss.discussions);
-  console.log("in use selector replies",discussion);
-  const filterUserId = useSelector((state: RootState) => state.discuss.filterUserId);
+
   // const id="66727439a71b6be5966a5507"
 
 
 //to correct
   const filteredDiscussions = filterUserId
-    ? discussion.filter(discussion => discussion.user === filterUserId)
+    ? discussion.filter((discussion: { user: any; }) => discussion.user === filterUserId)
     : discussion; 
- console.log("in filtereddis",filteredDiscussions)
+ console.log("in filterediscussion",filteredDiscussions);
+ console.log("in use selector replies filter",filterUserId);
    const fetchDiscussions = async ()=>{
     try{
       if(discussions){
@@ -218,10 +213,7 @@ const handleLike=async(id: string)=>{
     // return <><ThumbUpAltOutlined fontSize="small" />&nbsp;Like</>;
   };
   return (
-<>
-    {filteredDiscussions && filteredDiscussions?.length > 0 ? ( <>
-        {filteredDiscussions.map((discussion:any)=> (
-
+       <>
             <Card sx={{ maxWidth: 345,margin:"6px 3px"  }}>
             <CardHeader
               avatar={
@@ -234,25 +226,25 @@ const handleLike=async(id: string)=>{
                   <MoreVertIcon />
                 </IconButton>
               }
-              title={discussion.title}
-              subheader={`By:${discussion?.user}`}
+              title={discuss.title}
+              subheader={`By:${discuss?.user}`}
             />
           
             <CardContent>
               <Typography variant="body2" color="text.secondary">
-               {discussion.content}
+               {discuss.content}
               </Typography>
             </CardContent>
             <CardActions disableSpacing>
-              {role ? (  <> <IconButton  onClick={()=>handleLike(discussion.id)} aria-label="add to favorites">
-                like
+              {role ? (  <> <IconButton  onClick={()=>handleLike(discuss.id)} aria-label="add to favorites">
+              <ThumbUpIcon />
                
               </IconButton>
-              <IconButton  onClick={()=>handleClose(discussion.id)} aria-label="add to favorites">
+              <IconButton  onClick={()=>handleClose(discuss.id)} aria-label="add to favorites">
                 
                 <BlockIcon />
-              </IconButton> </>):( <IconButton  onClick={()=>handleLike(discussion.id)} aria-label="add to favorites">
-                like
+              </IconButton> </>):( <IconButton  onClick={()=>handleLike(discuss.id)} aria-label="add to favorites">
+              <ThumbUpIcon />
                
               </IconButton>)}
            
@@ -269,14 +261,13 @@ const handleLike=async(id: string)=>{
               <CardContent>
                 <Typography paragraph>Replies:</Typography>
                 <List sx={{ maxHeight: 100, overflow: 'auto' }}>
-                {discussion.replies.map((reply:any) => (
+                {discuss.replies.map((reply:any) => (
                 <ListItem key={reply.id}>
                   <ListItemText primary={reply.content} secondary={reply.user} />
                 </ListItem>
               ))}
-                  {/* Add more ListItem components as needed */}
+                 
                 </List>
-                //text field
                 <OutlinedInput
                   id="outlined-adornment-password"
                   sx={{ padding: '5px', width: '100%',height:'50px'}}
@@ -288,25 +279,18 @@ const handleLike=async(id: string)=>{
                     <InputAdornment position="end">
                       <IconButton
                         aria-label="toggle password visibility"
-                        onClick={()=>handleSubmit(discussion.id)}
+                        onClick={()=>handleSubmit(discuss.id)}
                         edge="end"
                       >
                      <ArrowRightIcon/>
                       </IconButton>
                     </InputAdornment>
-                  }
-                  
+                  }   
                 />
-              
               </CardContent>
             </Collapse>
           </Card>
-        ))}
-
-</>):(
-        <p>No discussions found.</p>
-      )}
-   </>
-  );
+     </>)
+  
 }
-export default  Card
+export default  Cards

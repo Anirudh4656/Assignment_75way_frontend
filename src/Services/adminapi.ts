@@ -12,6 +12,15 @@ interface User {
     isAdmin: boolean;
     blocked: boolean;
   }
+  interface admin {
+    username: string;
+    role:"ADMIN"|"USER";
+    email: string;
+    blocked: boolean;
+    id: boolean
+  }
+
+          
   interface BlockUserPayload {
     userId: string;
   }
@@ -19,7 +28,7 @@ export const adminApi=createApi({
     reducerPath:"adminApi",
     baseQuery:fetchBaseQuery({baseUrl:'http://localhost:5000/api/admin'}),
     endpoints:(builder)=>({
-          getAllUser:builder.query<User,void>({
+          getAllUser:builder.query<User[],void>({
          query:()=>'/getAllUsers'
           }) ,
           blockUser:builder.mutation<User,BlockUserPayload>({

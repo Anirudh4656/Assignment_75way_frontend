@@ -4,20 +4,25 @@ interface Discussion {
     id: string;
     title: string;
     content: string;
-    user: string;  }
-
+    user: string;  };
+    const token= localStorage.getItem('token');
 export const discussApi=createApi({
     reducerPath:"discussApi",
     baseQuery:fetchBaseQuery({baseUrl:'http://localhost:5000/api'}),
+    
     endpoints:(builder)=>({
           getDiscussion:builder.query<Discussion,void>({
          query:()=>'/getDiscussion'
           }),
+          
           createDiscussion:builder.mutation<Discussion,{title:string,content:string}>({
             query:({title ,content})=>({
                 url:'/createDiscussion',
                 method:'POST',
-                body:{title,content}
+                body:{title,content},
+                headers: {
+                  'Authorization': `Bearer ${token}`
+              }
 
             })
           }),
@@ -25,7 +30,10 @@ export const discussApi=createApi({
             query:({id})=>({
                 url:`/likeDiscussion/${id}`,
                 method:'PATCH',
-                body:{id}
+                body:{id},
+                headers: {
+                  'Authorization': `Bearer ${token}`
+              }
 
             })
           }),
@@ -33,7 +41,10 @@ export const discussApi=createApi({
             query:({discussionId,content })=>({
                 url:`/replyDiscussion/${discussionId}`,
                 method:"PATCH",
-                body:{discussionId,content}
+                body:{discussionId,content},
+                headers: {
+                  'Authorization': `Bearer ${token}`
+              }
             }) 
           })
     })
