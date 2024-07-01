@@ -8,6 +8,7 @@ import type {PayloadAction} from "@reduxjs/toolkit";
  }
  interface Like{
     id:string;
+    user:string;
  }
 interface Discussion {
     id: string;
@@ -82,11 +83,12 @@ const discussionSlice=createSlice({
         )=>{
 
             const { discussionId, userId } = action.payload;
+            console.log("in dispatch reply discussion",discussionId);
             const discussion = state.discussions.find(d => d.id === discussionId);
             if (discussion) {
               const userLikeIndex = discussion.likes.findIndex(like => like.id === userId);
               if (userLikeIndex === -1) {
-                discussion.likes.push({ id: userId });
+                discussion.likes.push({ user: userId ,id:discussionId});
               } else {
                 discussion.likes.splice(userLikeIndex, 1);
               }

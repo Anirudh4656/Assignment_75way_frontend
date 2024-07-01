@@ -24,13 +24,19 @@ interface User {
   interface BlockUserPayload {
     userId: string;
   }
+  const token= localStorage.getItem('token');
 export const adminApi=createApi({
     reducerPath:"adminApi",
     baseQuery:fetchBaseQuery({baseUrl:'http://localhost:5000/api/admin'}),
     endpoints:(builder)=>({
           getAllUser:builder.query<User[],void>({
-         query:()=>'/getAllUsers'
+         query:()=>({
+          url:'/getAllUsers',
+          headers: {
+            'Authorization': `Bearer ${token}`
+        }  })
           }) ,
+
           blockUser:builder.mutation<User,BlockUserPayload>({
             query:({userId})=>({
                   url:`/blockUser/${userId}`,

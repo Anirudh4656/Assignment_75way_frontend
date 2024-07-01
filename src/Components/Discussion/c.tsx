@@ -24,9 +24,12 @@ import { useAddReplyMutation } from '../../Services/discussapi'
 import { AppDispatch, RootState, useAppSelector } from "../../Store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { JwtPayload, jwtDecode } from 'jwt-decode';
+import { ThumbUpAltOutlined } from '@mui/icons-material';
 
 interface Like{
+  _id:string;
   id:string;
+  user:string;
 }
 interface MyToken extends JwtPayload {
   role: any;
@@ -34,6 +37,7 @@ interface MyToken extends JwtPayload {
   exp: number;
   _doc:any;
   _id:string;
+  id:string;
 }
  interface Discussion {
   _id:string;
@@ -72,17 +76,18 @@ const  Cards:React.FC<DiscussProps>=({discuss})=> {
   const [user, setUser] = useState<MyToken| null>(null);
   const [content ,setContent] =useState<string>("")
   const [role,setRole] =useState<boolean>(true);
+  const [like,setLike] =useState<Like[]>([]);
   const [addReply]=useAddReplyMutation();
   const { data: discussions, error, isLoading } = useGetDiscussionQuery();
   const [close]=useCloseMutation();
   const dispatch=useDispatch<AppDispatch>();
   const discussion = useSelector((state: RootState) => state.discuss.discussions);
-  console.log("in use selector replies",discussion);
+  console.log("in use selector of Discussion",discussion);
   const filterUserId = useSelector((state: RootState) => state.discuss);
-  console.log("in use selector replies filter",filterUserId);
+  // console.log("in use selector replies filter",filterUserId);
   //why discussions
   useEffect(()=>{
-    console.log("in use selector replies filter",filterUserId);
+    // console.log("in use selector replies filter",filterUserId);
 
     fetchDiscussions();
     const token = localStorage.getItem('token');
@@ -90,7 +95,7 @@ const  Cards:React.FC<DiscussProps>=({discuss})=> {
 if (token) {
   try{
       const decodedToken = jwtDecode<MyToken>(token);
-      console.log(`in decode ${JSON.stringify(decodedToken.role)}`);
+      console.log(`in decode ${JSON.stringify(decodedToken)}`);
       //check
     
           setUser(decodedToken);
@@ -116,8 +121,8 @@ if (token) {
   const filteredDiscussions = filterUserId
     ? discussion.filter((discussion: { user: any; }) => discussion.user === filterUserId)
     : discussion; 
- console.log("in filterediscussion",filteredDiscussions);
- console.log("in use selector replies filter",filterUserId);
+//  console.log("in filterediscussion",filteredDiscussions);
+//  console.log("in use selector replies filter",filterUserId);
    const fetchDiscussions = async ()=>{
     try{
       if(discussions){
@@ -173,22 +178,32 @@ const handleSubmit=async(id: string)=>{
 
 
 const handleLike=async(id: string)=>{
+  console.log("in hqndle like",id)
+  const i="6681574b289dd33719346837";
   //check
-  const hasLikedPost = discussion.map((discussion)=>{ return discussion.likes.find((like)=>like.toString()===id)})
-    console.log(`in handle like  ${id}`);
+  //why not find and filter
+  const discuss=discussion.find((discussion)=>discussion.id===id)
+  console.log("in find discussion",discuss);
+  const hasLikedPost = discuss?.likes.some((l)=>l.user===i);
+    console.log("in handleliked post",hasLikedPost);
 
    try{
+ 
     const like= await likeDiscussion({id:id});
     if(like.data){
       //
-      const user=like.data.data._id;
-      console.log("in like",like.data.data._id);
-      dispatch(likeDiscussions({discussionId:id ,userId:user}));
-      // if (hasLikedPost) {
-      //   setLikes(post.likes.filter((id) => id !== userId));
-      // } else {
-      //   setLikes([...post.likes, userId]);
-      // }
+      // const user=like.data.data._id;
+      console.log("in like",like.data.data);
+      console.log("in like user",user);
+      dispatch(likeDiscussions({discussionId:id ,userId:like.data.data._id}));
+      if (hasLikedPost){
+const result=discuss?.likes.filter((like) => like.id !==user?.id )
+console.log("result",result);
+        // setLike(result);
+        console.log("in set like",like);
+      } else {
+        // setLike([...discuss?.likes, user?.id]);
+      }
     }
 
    }catch(e){console.log(e)}
@@ -197,20 +212,21 @@ const handleLike=async(id: string)=>{
 
   };
  const handleClose=async(id: string)=>{
-  const closed= await close({id:id});
-  console.log("in hadle clse",closed);
+  // const closed= await close({id:id});
+  // console.log("in hadle clse",closed);
  }
   const Likes = () => {
-    // if (likes.length > 0) {
-    //   return likes.find((like) => like === userId)
-    //     ? (
-    //       <><ThumbUpAltIcon fontSize="small" />&nbsp;{likes.length > 2 ? `You and ${likes.length - 1} others` : `${likes.length} like${likes.length > 1 ? 's' : ''}` }</>
-    //     ) : (
-    //       <><ThumbUpAltOutlined fontSize="small" />&nbsp;{likes.length} {likes.length === 1 ? 'Like' : 'Likes'}</>
-    //     );
-    // }
+    // console.log(like.map(like)=>like)
+    if (like.length > 0) {
+      return like?.find((like) => like === user.id)
+        ? (
+          <><ThumbUpIcon fontSize="small" />&nbsp;{like.length > 2 ? `You and ${like.length - 1} others` : `${like.length} like${like.length > 1 ? 's' : ''}` }</>
+        ) : (
+          <><ThumbUpAltOutlined fontSize="small" />&nbsp;{like.length} {like.length === 1 ? 'Like' : 'Likes'}</>
+        );
+    }
 
-    // return <><ThumbUpAltOutlined fontSize="small" />&nbsp;Like</>;
+    return <><ThumbUpAltOutlined fontSize="small" />&nbsp;Like</>;
   };
   return (
        <>
@@ -237,14 +253,14 @@ const handleLike=async(id: string)=>{
             </CardContent>
             <CardActions disableSpacing>
               {role ? (  <> <IconButton  onClick={()=>handleLike(discuss.id)} aria-label="add to favorites">
-              <ThumbUpIcon />
+              <Likes />
                
               </IconButton>
               <IconButton  onClick={()=>handleClose(discuss.id)} aria-label="add to favorites">
                 
                 <BlockIcon />
               </IconButton> </>):( <IconButton  onClick={()=>handleLike(discuss.id)} aria-label="add to favorites">
-              <ThumbUpIcon />
+              <Likes />
                
               </IconButton>)}
            

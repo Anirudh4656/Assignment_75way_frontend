@@ -1,10 +1,10 @@
 import React from "react"
-import AllUsers from "../Components/Admin";
+import Ind from "../Components/Admin/index";
 //protected route for admin is Admin
  const Admin:React.FC=()=>{
     return(
         <>
-        <AllUsers />
+        <Ind />
         </>
     )
  }
