@@ -17,9 +17,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { InputAdornment, List, ListItem, ListItemText, OutlinedInput } from '@mui/material';
 import { useGetDiscussionQuery, useLikeDiscussionMutation } from '../../Services/discussapi'
 import { useCloseMutation } from '../../Services/adminapi';
-import { Button } from '@mui/material';
 import { getDiscussions, likeDiscussions} from '../../Store/reducers/discussionReducer';
-import { replyDiscussion} from '../../Store/reducers/discussionReducer';
+import { replyDiscussion,  closeDiscussions} from '../../Store/reducers/discussionReducer';
 import { useAddReplyMutation } from '../../Services/discussapi'
 import { AppDispatch, RootState, useAppSelector } from "../../Store/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -47,6 +46,7 @@ interface MyToken extends JwtPayload {
   user: string;
   replies: Reply[];
   likes: Like[];
+  isClosed:boolean
 }
 interface Reply {
   content: string;
@@ -71,24 +71,25 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 interface DiscussProps {
   discuss: any; // Adjust 'any' to the actual type of 'discuss' prop
 }
+interface newlike{
+    user: string;
+
+}
 const  Cards:React.FC<DiscussProps>=({discuss})=> { 
   const [expanded, setExpanded] = React.useState(false);
   const [user, setUser] = useState<MyToken| null>(null);
   const [content ,setContent] =useState<string>("")
-  const [role,setRole] =useState<boolean>(true);
-  const [like,setLike] =useState<Like[]>([]);
+  const [role,setRole] =useState<boolean>(false);
+  const [likediscuss,setLikediscuss] =useState<newlike[]>([]);
   const [addReply]=useAddReplyMutation();
-  const { data: discussions, error, isLoading } = useGetDiscussionQuery();
+  const { data: discussions, refetch:refetchGetDiscussions } = useGetDiscussionQuery();
   const [close]=useCloseMutation();
   const dispatch=useDispatch<AppDispatch>();
   const discussion = useSelector((state: RootState) => state.discuss.discussions);
   console.log("in use selector of Discussion",discussion);
   const filterUserId = useSelector((state: RootState) => state.discuss);
-  // console.log("in use selector replies filter",filterUserId);
-  //why discussions
+  const[likeDiscussion] = useLikeDiscussionMutation() 
   useEffect(()=>{
-    // console.log("in use selector replies filter",filterUserId);
-
     fetchDiscussions();
     const token = localStorage.getItem('token');
 
@@ -99,28 +100,27 @@ if (token) {
       //check
     
           setUser(decodedToken);
-          console.log("inuser",decodedToken);
+          console.log("inrole",role)
+          console.log("inuser",decodedToken.role);
           if(decodedToken.role==="ADMIN"){
             setRole(true);
-          }
-          
-          
-        
+         
+          }         
   }catch(error){console.error('failed todecode',error)}; }
-   },[discussions,dispatch])
+   },[discussions,dispatch,refetchGetDiscussions])
+
+
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
  
- 
 
-  // const id="66727439a71b6be5966a5507"
 
 
 //to correct
-  const filteredDiscussions = filterUserId
-    ? discussion.filter((discussion: { user: any; }) => discussion.user === filterUserId)
-    : discussion; 
+//   const filteredDiscussions = filterUserId
+//     ? discussion.map((discuss)=>discuss.filter((discussion: { user: any; }) => discussion.user === filterUserId))
+//     : discussion; 
 //  console.log("in filterediscussion",filteredDiscussions);
 //  console.log("in use selector replies filter",filterUserId);
    const fetchDiscussions = async ()=>{
@@ -138,10 +138,9 @@ if (token) {
             user: reply.user,
             id: reply._id
           })),
-          likes: discussion.likes // Assuming likes is an array of user ids
+          likes: discussion.likes,
+          isClosed:discussion.isClosed 
         }));
-
-        // Dispatch the getDiscussion action with transformed discussions
         dispatch(getDiscussions({ discussions: transformedDiscussions }));
     
       }
@@ -150,24 +149,21 @@ if (token) {
       console.log("erroris",error.message);
     }
   }
-   const[likeDiscussion] = useLikeDiscussionMutation() 
+ 
 
 const handleSubmit=async(id: string)=>{
     console.log("in handleSubmit",id)
       try{
-        //error handling
         const response =await addReply({content,discussionId:id});
      
-        if (response.data) {
+        if(response.data) {
             const reply: Reply = {
               content: response.data.data.content,
               user: response.data.data.user,
               id: response.data.data._id
             };
-
             console.log("response ",reply)  
                  dispatch(replyDiscussion({discussionId:id,content:reply}));
-          
         }else {
             console.error('Response data is undefined', response.error);
           }
@@ -175,34 +171,44 @@ const handleSubmit=async(id: string)=>{
     }catch(error){console.log("error  is",error)}
 }
 
-
-
 const handleLike=async(id: string)=>{
-  console.log("in hqndle like",id)
-  const i="6681574b289dd33719346837";
+  //userid
+  console.log("in hqndle like",user?.id);
+
   //check
   //why not find and filter
-  const discuss=discussion.find((discussion)=>discussion.id===id)
+  const discuss=discussion.find((discussion:any)=>discussion.id===id)
   console.log("in find discussion",discuss);
-  const hasLikedPost = discuss?.likes.some((l)=>l.user===i);
-    console.log("in handleliked post",hasLikedPost);
-
+  if (!discuss) {
+    console.log("Discussion not found");
+    return;
+  }
+  
    try{
- 
     const like= await likeDiscussion({id:id});
-    if(like.data){
-      //
-      // const user=like.data.data._id;
-      console.log("in like",like.data.data);
-      console.log("in like user",user);
-      dispatch(likeDiscussions({discussionId:id ,userId:like.data.data._id}));
+    if(like){
+      console.log( "in likes",like )
+    }
+   
+    if(user?.id){
+      const hasLikedPost = discuss?.likes.some((like:any)=>like.user===user.id);
+      console.log("in handleliked post",hasLikedPost);
       if (hasLikedPost){
-const result=discuss?.likes.filter((like) => like.id !==user?.id )
-console.log("result",result);
-        // setLike(result);
-        console.log("in set like",like);
+  const result=discuss?.likes.filter((like:any) => like.user !== user?.id );
+  console.log("result",result);
+   dispatch(likeDiscussions({ discussionId: id, userId: user.id ,action: 'dislike' }));
+        setLikediscuss(result || []);
+       
+        console.log("in usestae",likediscuss)
       } else {
-        // setLike([...discuss?.likes, user?.id]);
+       console.log("user liked");
+       const newLike = { user: user.id };
+       const updatedLikes = [...discuss.likes, newLike];
+       console.log("Updated likes after addition:", updatedLikes);
+       dispatch(likeDiscussions({ discussionId: id, userId: user.id ,action: 'like' }));
+       setLikediscuss([...discuss.likes, newLike]);
+       console.log("in usestae",likediscuss)
+
       }
     }
 
@@ -212,17 +218,18 @@ console.log("result",result);
 
   };
  const handleClose=async(id: string)=>{
-  // const closed= await close({id:id});
-  // console.log("in hadle clse",closed);
+  const closed= await close({id:id});
+  console.log("in hadle clse",id,closed);
+  dispatch(closeDiscussions({id}));
  }
   const Likes = () => {
-    // console.log(like.map(like)=>like)
-    if (like.length > 0) {
-      return like?.find((like) => like === user.id)
+    // console.log(like.map(like)=>like);
+    if (likediscuss.length > 0) {
+      return likediscuss?.find((like) => like )
         ? (
-          <><ThumbUpIcon fontSize="small" />&nbsp;{like.length > 2 ? `You and ${like.length - 1} others` : `${like.length} like${like.length > 1 ? 's' : ''}` }</>
+          <><ThumbUpIcon fontSize="small" />&nbsp;{likediscuss.length > 2 ? `You and ${likediscuss.length - 1} others` : `${likediscuss.length} like${likediscuss.length > 1 ? 's' : ''}` }</>
         ) : (
-          <><ThumbUpAltOutlined fontSize="small" />&nbsp;{like.length} {like.length === 1 ? 'Like' : 'Likes'}</>
+          <><ThumbUpAltOutlined fontSize="small" />&nbsp;{likediscuss.length} {likediscuss.length === 1 ? 'Like' : 'Likes'}</>
         );
     }
 
@@ -273,8 +280,10 @@ console.log("result",result);
                 <ExpandMoreIcon />
               </ExpandMore>
             </CardActions>
+
             <Collapse in={expanded} timeout="auto" unmountOnExit>
-              <CardContent>
+           
+<CardContent>
                 <Typography paragraph>Replies:</Typography>
                 <List sx={{ maxHeight: 100, overflow: 'auto' }}>
                 {discuss.replies.map((reply:any) => (
@@ -284,27 +293,32 @@ console.log("result",result);
               ))}
                  
                 </List>
-                <OutlinedInput
-                  id="outlined-adornment-password"
-                  sx={{ padding: '5px', width: '100%',height:'50px'}}
-                  name="content"
-                  label="Reply"
-                  value={content} 
-                  onChange={(e)=>setContent(e.target.value)}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={()=>handleSubmit(discuss.id)}
-                        edge="end"
-                      >
-                     <ArrowRightIcon/>
-                      </IconButton>
-                    </InputAdornment>
-                  }   
-                />
+
+                {discuss.isClosed===true ? (
+              "discussion is closed"
+               
+            )  : (  <OutlinedInput
+              id="outlined-adornment-password"
+              sx={{ padding: '5px', width: '100%',height:'50px'}}
+              name="content"
+              label="Reply"
+              value={content} 
+              onChange={(e)=>setContent(e.target.value)}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={()=>handleSubmit(discuss.id)}
+                    edge="end"
+                  >
+                 <ArrowRightIcon/>
+                  </IconButton>
+                </InputAdornment>
+              }   
+            />   )   }
+                
               </CardContent>
-            </Collapse>
+          </Collapse>
           </Card>
      </>)
   

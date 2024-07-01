@@ -4,7 +4,8 @@ interface Discussion {
     id: string;
     title: string;
     content: string;
-    user: string;  };
+    user: string; 
+  isClosed:boolean };
     const token= localStorage.getItem('token');
 export const discussApi=createApi({
     reducerPath:"discussApi",

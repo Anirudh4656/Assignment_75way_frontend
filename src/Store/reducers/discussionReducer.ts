@@ -7,9 +7,10 @@ import type {PayloadAction} from "@reduxjs/toolkit";
     id:string;
  }
  interface Like{
-    id:string;
-    user:string;
- }
+  _id:string;
+  id:string;
+  user:string;
+}
 interface Discussion {
     id: string;
     title: string;
@@ -17,6 +18,7 @@ interface Discussion {
     user: string;
     replies:Reply[];
     likes:Like[];
+    isClosed:boolean
   }
   
 interface DiscussState{
@@ -79,22 +81,40 @@ const discussionSlice=createSlice({
         },
         likeDiscussions:(
             state,
-            action:PayloadAction<{discussionId:string,userId:string}>
+            action:PayloadAction<{discussionId:string,userId:string,action: 'like' | 'dislike'}>
         )=>{
 
-            const { discussionId, userId } = action.payload;
+          const { discussionId, userId, action: likeAction } = action.payload;
             console.log("in dispatch reply discussion",discussionId);
             const discussion = state.discussions.find(d => d.id === discussionId);
+  
             if (discussion) {
-              const userLikeIndex = discussion.likes.findIndex(like => like.id === userId);
-              if (userLikeIndex === -1) {
-                discussion.likes.push({ user: userId ,id:discussionId});
-              } else {
-                discussion.likes.splice(userLikeIndex, 1);
+              if (likeAction === 'like') {
+                discussion.likes.push({
+                  user: userId,
+                  _id: "",
+                  id: ""
+                });
+              } else if (likeAction === 'dislike') {
+                discussion.likes = discussion.likes.filter(like => like.user !== userId);
               }
             }
-         console.log("like reducer",state);
+      
         },
+        closeDiscussions:(
+          state,
+          action:PayloadAction<{id:string}>
+      )=>{
+
+          const { id} = action.payload;
+          console.log("in dispatch reply discussion",id);
+          const discussion = state.discussions.find(d => d.id === id);
+          if (discussion) {
+            console.log("indiscussion",discussion)
+            //shi krna h
+            // discussion.isClosed = true;
+            } 
+          },
         replyDiscussion:(
             state,
             action:PayloadAction<{discussionId:string,content:Reply}>
@@ -111,5 +131,5 @@ const discussionSlice=createSlice({
         }
     }
 })
-export const {  getDiscussions,  setFilterUserId,setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
+export const {  getDiscussions,  closeDiscussions,  setFilterUserId,setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
 export default discussionSlice.reducer;

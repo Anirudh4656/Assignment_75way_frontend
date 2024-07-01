@@ -40,21 +40,30 @@ export const adminApi=createApi({
           blockUser:builder.mutation<User,BlockUserPayload>({
             query:({userId})=>({
                   url:`/blockUser/${userId}`,
-                method: 'PUT'
+                method: 'PUT',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+              } 
             })
               
           }),
           deleteUser:builder.mutation<User,BlockUserPayload>({
             query:({userId})=>({
                   url:`/deleteUser/${userId}`,
-                method: 'PUT'
+                method: 'PUT',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+              } 
             })
               
           }),
           close:builder.mutation<User,{id:string}>({
             query:({id})=>({
               url:`/closeDiscussion/${id}`,
-            method: 'PATCH'
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${token}`
+          } 
         })
           })
             

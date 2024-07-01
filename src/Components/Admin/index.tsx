@@ -7,6 +7,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState, useAppSelector } from "../../Store/store";
 import DeleteIcon from '@mui/icons-material/Delete';
 import BlockIcon from '@mui/icons-material/Block';
+import AllUsers from "./AllUsers"
+
 interface User{
     username: string;
     length: number;
@@ -52,79 +54,48 @@ interface admin {
 const index:React.FC=()=>{
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-    const {data: getAllUsers} =useGetAllUserQuery();
+    const {data: getAllUsers,refetch:refetchGetAllUsers} =useGetAllUserQuery();
     const [blockUser]=useBlockUserMutation();
     const [deleteUser]=useDeleteUserMutation();
     const dispatch = useDispatch<AppDispatch>();
     const admin = useSelector((state: RootState) => state.admin.users);
     console.log("admmin",admin);
+    const [isUserToggled, setIsUserToggled] = useState<boolean>(true);
     //backend user authentication if block condition
    //why state update 
   
    useEffect(()=>{ 
+    const fetchDiscussions = async ()=>{
+      try{
+        if(getAllUsers){
+    
+          console.log("check rendering of component",getAllUsers);
+  
+     const transformedUsers: IUser[] = getAllUsers.map((user: any) => ({
+            id: user._id,
+            username: user.username,
+            role:user.role,
+            email: user.email,
+            isBlocked: user.isBlocked
+          }));
+  
+          dispatch(setUsers({ user: transformedUsers }));
+      console.log("allusers",transformedUsers);
+        }
+      }catch(error:any){
+  
+        console.log("erroris",error.message);
+      }  }
       fetchDiscussions();
     
-   },[])
+   },[isUserToggled,getAllUsers, refetchGetAllUsers])
 
-   const fetchDiscussions = async ()=>{
-    try{
-      if(getAllUsers){
-  
-        console.log("check rendering of component");
-
-   const transformedUsers: IUser[] = getAllUsers.data.map((user: any) => ({
-          id: user._id,
-          username: user.username,
-          role:user.role,
-          email: user.email,
-          isBlocked: user.isBlocked
    
-        }));
-
-        dispatch(setUsers({ user: transformedUsers }));
-    console.log("allusers",transformedUsers);
-      }
-    }catch(error:any){
-
-      console.log("erroris",error.message);
-    }  }
    
- 
+ console.log("usestate",isUserToggled)
 
-    const handleToggleUserStatus = async (getUser:any) => {
-    if (getUser) {
-            console.log('in handleToggleStatus',getUser.id);
-            try {
-              const response = await blockUser({userId:getUser.id});
-              console.log(`i am in response ${JSON.stringify(response)}`);
-             
-              if ('data' in response && response.data) {
-                //toogle in backend
-                dispatch(blockUsers({userId:getUser.id ,isBlocked:getUser.isBlocked}));
-              }
-           
-          }catch(error){
-            console.log("error is",error);
-          }  
-         
-    }  }
-    const handleDeleteUser=async(getUser:any)=>{
-      if (getUser) {
-        console.log('in handleToggleUserStatus',getUser.id);
-        try {
-          const response = await deleteUser({userId:getUser.id});
-          console.log(`i am in delteresponse ${JSON.stringify(response)}`);
-         
-          if ('data' in response && response.data) {
-            //toogle in backend
-            dispatch(deleteUsers({userId:getUser.id }));
-          }
-    
-      }catch(error){
-        console.log("error is",error);
-      }  
-     
-    }}
+   
+   
     
     return(
         <Paper>
@@ -137,26 +108,12 @@ const index:React.FC=()=>{
             </TableRow>
           </TableHead>
           <TableBody>
-          {admin && admin.length > 0 ? (
-            admin.map((getUser:any) => (
- 
-      <TableRow key={getUser._id} >
-      <TableCell >{getUser.username}</TableCell>
-      <TableCell >{getUser.email}</TableCell> 
-      <TableCell >
-               
-                    <Button onClick={()=>handleToggleUserStatus(getUser)}>
-                      {getUser?.isBlocked ? "unblock" : <BlockIcon/>}
-                    </Button>
-                    <Button onClick={()=>handleDeleteUser(getUser)}><DeleteIcon/></Button>
-                  
- </TableCell> 
-       </TableRow>
-) )
-           ) : 
-           (
-        <p>No Users Found.</p>
-      )}
+         {
+          admin && admin.length > 0 ? ( admin.map((getUser:any) => (
+             <AllUsers key={getUser.id} a={getUser} Toggled={setIsUserToggled}/>
+              ) )
+            ): ( <p>No Users Found.</p> )
+         }
           </TableBody>
    
       </Table>
@@ -176,3 +133,10 @@ export default index;
 //   const userId = action.payload;
 //   state.users = state.users.filter(user => user._id !== userId);
 // },
+// {admin && admin.length > 0 ? (
+//   admin.map((getUser:any) => (
+// <AllUsers a={getUser} />
+//  ) ): 
+//  (
+// <p>No Users Found.</p>
+// )}

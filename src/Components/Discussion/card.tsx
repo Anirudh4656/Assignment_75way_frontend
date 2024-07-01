@@ -27,6 +27,8 @@ interface MyToken extends JwtPayload {
   user: string;
   replies: Reply[];
   likes: Like[];
+  isClosed:boolean
+  
 }
 interface Reply {
   content: string;
@@ -37,10 +39,11 @@ interface Reply {
 const  RecipeReviewCard: () => JSX.Element=()=> {
   const [user, setUser] = useState<MyToken| null>(null);
   const [role,setRole] =useState<boolean>(false);
+  const [close,setClose] =useState<boolean>(false);
   const [addReply]=useAddReplyMutation();
   const { data: discussions, error, isLoading } = useGetDiscussionQuery();
   const dispatch=useDispatch<AppDispatch>();
-
+console.log("in discuss before use state",discussions)
   useEffect(()=>{
 
     fetchDiscussions();
@@ -65,8 +68,8 @@ if (token) {
   const discussion = useSelector((state: RootState) => state.discuss.discussions);
   const filterUserId = useSelector((state: RootState) => state.discuss.filterUserId);
 
-  const result=discussion.filter(discuss =>  {return discuss.user===filterUserId } )
-  console.log("result",filterUserId,"than ",result)
+  const result=discussion.filter(discuss=>  {return discuss.user===filterUserId } )
+
 
   const filteredDiscussions = filterUserId
     ? discussion.filter(discuss =>  {return discuss.user===filterUserId } )
@@ -87,10 +90,12 @@ if (token) {
             user: reply.user,
             id: reply._id
           })),
-          likes: discussion.likes // Assuming likes is an array of user ids
+          likes: discussion.likes, 
+          isClosed:discussion.isClosed// Assuming likes is an array of user ids
         }));
 
         dispatch(getDiscussions({ discussions: transformedDiscussions }));
+        setClose(discussion.isClosed);
     
       }
     }catch(error:any){
