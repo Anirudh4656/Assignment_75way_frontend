@@ -9,7 +9,9 @@ import { JwtPayload, jwtDecode } from 'jwt-decode';
 import Cards from './c';
 
 interface Like{
+  _id:string;
   id:string;
+  user:string;
 }
 interface MyToken extends JwtPayload {
   role: any;
@@ -38,6 +40,7 @@ interface Reply {
 
 const  RecipeReviewCard: () => JSX.Element=()=> {
   const [user, setUser] = useState<MyToken| null>(null);
+  //check role
   const [role,setRole] =useState<boolean>(false);
   const [close,setClose] =useState<boolean>(false);
   const [addReply]=useAddReplyMutation();
@@ -95,7 +98,7 @@ if (token) {
         }));
 
         dispatch(getDiscussions({ discussions: transformedDiscussions }));
-        setClose(discussion.isClosed);
+       
     
       }
     }catch(error:any){

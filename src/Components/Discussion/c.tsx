@@ -80,7 +80,7 @@ const  Cards:React.FC<DiscussProps>=({discuss})=> {
   const [user, setUser] = useState<MyToken| null>(null);
   const [content ,setContent] =useState<string>("")
   const [role,setRole] =useState<boolean>(false);
-  const [likediscuss,setLikediscuss] =useState<newlike[]>([]);
+  const [likediscuss,setLikediscuss] =useState<newlike[]>(discuss?.likes);
   const [addReply]=useAddReplyMutation();
   const { data: discussions, refetch:refetchGetDiscussions } = useGetDiscussionQuery();
   const [close]=useCloseMutation();
@@ -281,9 +281,8 @@ const handleLike=async(id: string)=>{
               </ExpandMore>
             </CardActions>
 
-            <Collapse in={expanded} timeout="auto" unmountOnExit>
-           
-<CardContent>
+            <Collapse in={expanded} timeout="auto" unmountOnExit> 
+            <CardContent>
                 <Typography paragraph>Replies:</Typography>
                 <List sx={{ maxHeight: 100, overflow: 'auto' }}>
                 {discuss.replies.map((reply:any) => (

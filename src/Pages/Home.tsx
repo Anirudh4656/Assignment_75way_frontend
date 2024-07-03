@@ -14,7 +14,6 @@ const Home:React.FC = () => {
 
   return (
     <>
-   
     <NavBar/>
     <Container maxWidth="xl">
     <Grid container  spacing={3}>

@@ -9,8 +9,10 @@ interface FormState{
     content:string;
 }
 interface Like{
+    _id:string;
     id:string;
-}
+    user:string;
+  }
 interface Reply {
     content: string;
     user: string;
@@ -23,6 +25,7 @@ interface Discussion {
     user: string;
     likes:Like[];
     replies:Reply[];
+    isClosed:boolean
   }
   
 const initialState: FormState = { title:"",content:""};
@@ -36,16 +39,19 @@ const handleSubmit = async (e:FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try{
         const newDiscussion = await createDiscussion(postData);
+   
 
 if (newDiscussion.data) {
     // Accessing fields within response.data
+    console.log("in new discussion",newDiscussion)
     const newDiscuss: Discussion = {
         content: newDiscussion.data.data.content,
         id: newDiscussion.data.data._id,
         title: newDiscussion.data.data.title,
-        user: "123",
+        user: newDiscussion.data.data.user,
         likes:newDiscussion.data.data.likes,
-        replies:newDiscussion.data.data.replies
+        replies:newDiscussion.data.data.replies,
+        isClosed:newDiscussion.data.data.isClosed
     };
   
 dispatch(postDiscussion(newDiscuss));
