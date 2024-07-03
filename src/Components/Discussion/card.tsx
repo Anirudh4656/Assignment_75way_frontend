@@ -5,13 +5,21 @@ import { getDiscussions} from '../../Store/reducers/discussionReducer';
 import { useAddReplyMutation } from '../../Services/discussapi'
 import { AppDispatch, RootState, useAppSelector } from "../../Store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { JwtPayload, jwtDecode } from 'jwt-decode';
+import { JwtPayload, jwtDecode } from 'jwt-decode'
 import Cards from './c';
 
 interface Like{
   _id:string;
   id:string;
   user:string;
+}
+interface Reply {
+  id: string;
+  content: string;
+  user: string;
+  name:string;
+  replies: Reply[];
+  likes: Like[];
 }
 interface MyToken extends JwtPayload {
   role: any;
@@ -24,6 +32,7 @@ interface MyToken extends JwtPayload {
  interface Discussion {
   _id:string;
   id: string;
+  name:string;
   title: string;
   content: string;
   user: string;
@@ -32,11 +41,6 @@ interface MyToken extends JwtPayload {
   isClosed:boolean
   
 }
-interface Reply {
-  content: string;
-  user: string;
-  id: string;
-}
 
 const  RecipeReviewCard: () => JSX.Element=()=> {
   const [user, setUser] = useState<MyToken| null>(null);
@@ -44,7 +48,7 @@ const  RecipeReviewCard: () => JSX.Element=()=> {
   const [role,setRole] =useState<boolean>(false);
   const [close,setClose] =useState<boolean>(false);
   const [addReply]=useAddReplyMutation();
-  const { data: discussions, error, isLoading } = useGetDiscussionQuery();
+  const { data: discussions, error, isLoading,refetch: refetchGetDiscussions } = useGetDiscussionQuery();
   const dispatch=useDispatch<AppDispatch>();
 console.log("in discuss before use state",discussions)
   useEffect(()=>{
@@ -66,31 +70,33 @@ if (token) {
           
         
   }catch(error){console.error('failed todecode',error)}; }
-   },[discussions,dispatch])
+   },[discussions,dispatch,refetchGetDiscussions ])
   
   const discussion = useSelector((state: RootState) => state.discuss.discussions);
   const filterUserId = useSelector((state: RootState) => state.discuss.filterUserId);
 
-  const result=discussion.filter(discuss=>  {return discuss.user===filterUserId } )
+  const result=discussion.filter((discuss:any)=>  {return discuss.user===filterUserId } )
 
 
   const filteredDiscussions = filterUserId
-    ? discussion.filter(discuss =>  {return discuss.user===filterUserId } )
+    ? discussion.filter((discuss:any) =>  {return discuss.user===filterUserId } )
     : discussion; 
  console.log("in filtereddis",filteredDiscussions)
    const fetchDiscussions = async ()=>{
     try{
       if(discussions){
   
-        console.log("check rendering of component");
+        console.log("check rendering of component",discussions);
         const transformedDiscussions: Discussion[] = discussions.data.map((discussion: any) => ({
           id: discussion._id,
           title: discussion.title,
           content: discussion.content,
           user: discussion.user,
+          name:discussion.name,
           replies: discussion.replies.map((reply: any) => ({
             content: reply.content,
             user: reply.user,
+            name:reply.name,
             id: reply._id
           })),
           likes: discussion.likes, 

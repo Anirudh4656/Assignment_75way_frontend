@@ -1,11 +1,14 @@
 import {createSlice} from "@reduxjs/toolkit";
 import type {PayloadAction} from "@reduxjs/toolkit";
 
- interface Reply {
-    content: string;
-    user: string;
-    id:string;
- }
+interface Reply {
+  id: string;
+  content: string;
+  user: string;
+  name:string;
+  replies: Reply[];
+  likes: Like[];
+}
  interface Like{
   _id:string;
   id:string;
@@ -15,6 +18,7 @@ interface Discussion {
     id: string;
     title: string;
     content: string;
+    name:string;
     user: string;
     replies:Reply[];
     likes:Like[];
@@ -115,7 +119,41 @@ const discussionSlice=createSlice({
             // discussion.isClosed = true;
             } 
           },
-        replyDiscussion:(
+          nestedreply:(
+            state,
+            action:PayloadAction<{discussionId:string,content:Reply,replyId:string}>)=>{
+
+              const {discussionId,content,replyId}=action.payload;
+              // console.log("in dispatch nestedreply discussion",discussionId,"f",content,"and replyID is:",replyId);
+              const discussion= state.discussions.find((discussion:Discussion)=>discussion.id===discussionId);
+              console.log("discussion of nestedReply",discussion);
+              if(discussion){
+
+                console.log("discussion");
+              const addNestedReply=(replies:Reply[],replyId:string,content:Reply)=>{
+              for(let reply of replies){
+                console.log("in addNestedReply",reply);
+                  if(reply.id==replyId){
+                    console.log(true);
+                    if (!reply.replies) {
+                      reply.replies = [];
+                    }
+                    reply.replies.push(content);
+                    return true;
+                  }
+                  if(addNestedReply(reply.replies,replyId,content)){
+                    return true;
+                  }
+                 }
+                 return false;
+              }
+
+              addNestedReply(discussion.replies,replyId,content);
+              }
+            
+
+            },
+         replyDiscussion:(
             state,
             action:PayloadAction<{discussionId:string,content:Reply}>
         )=>{
@@ -131,5 +169,5 @@ const discussionSlice=createSlice({
         }
     }
 })
-export const {  getDiscussions,  closeDiscussions,  setFilterUserId,setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
+export const {  getDiscussions, nestedreply, closeDiscussions,  setFilterUserId,setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
 export default discussionSlice.reducer;

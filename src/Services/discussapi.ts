@@ -47,6 +47,17 @@ export const discussApi=createApi({
                   'Authorization': `Bearer ${token}`
               }
             }) 
+          }),
+          addNestedReply:builder.mutation<Discussion,{content:string,replyId:string,discussionId:string}>({
+            query:({content,replyId,discussionId})=>({
+              url:'/nestedReply',
+              method:"PATCH",
+              body:{discussionId,content,replyId},
+              headers: {
+                'Authorization': `Bearer ${token}`
+            }
+          }) 
+
           })
     })
 })
@@ -55,7 +66,8 @@ export const {
     useGetDiscussionQuery,
     useCreateDiscussionMutation,
     useLikeDiscussionMutation,
-    useAddReplyMutation
+    useAddReplyMutation,
+    useAddNestedReplyMutation
 }=discussApi;
 // async onQueryStarted(arg, { dispatch, getState }) {
 //     await refreshTokenIfNeeded(dispatch, getState);
