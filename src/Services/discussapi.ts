@@ -38,6 +38,16 @@ export const discussApi=createApi({
 
             })
           }),
+          addReplyLike:builder.mutation<Discussion,{id:string}>({
+            query:({id})=>({
+              url:`/likeReply/${id}`,
+              method:'PATCH',
+              body:{id},
+              headers: {
+                'Authorization': `Bearer ${token}`
+            }
+            })
+          }),
           addReply:builder.mutation<Discussion,{discussionId:string,content:string}>({
             query:({discussionId,content })=>({
                 url:`/replyDiscussion/${discussionId}`,
@@ -67,7 +77,8 @@ export const {
     useCreateDiscussionMutation,
     useLikeDiscussionMutation,
     useAddReplyMutation,
-    useAddNestedReplyMutation
+    useAddNestedReplyMutation,
+    useAddReplyLikeMutation
 }=discussApi;
 // async onQueryStarted(arg, { dispatch, getState }) {
 //     await refreshTokenIfNeeded(dispatch, getState);

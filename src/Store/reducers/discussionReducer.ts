@@ -83,13 +83,46 @@ const discussionSlice=createSlice({
               };
 
         },
+        likeReply:( state,
+          action:PayloadAction<{discussionId:string,userId:string,replyId:string,action:'like' |'dislike'}>)=>{
+
+            const { discussionId, userId,replyId, action: likeAction } = action.payload;
+            console.log("in dispatch likeReducer discussion",discussionId);
+            const discussion = state.discussions.find(d => d.id === discussionId);
+            if (discussion) {
+              const findReplyById = (replies: Reply[], id: string): Reply | null => {
+                for (const reply of replies) {
+                  if (reply.id === id) {
+                    return reply;
+                  }
+                  const nestedReply = findReplyById(reply.replies, id);
+                  if (nestedReply) {
+                    return nestedReply;
+                  }
+                }
+                return null;
+              };
+      
+              const reply = findReplyById(discussion.replies, replyId);
+              console.log(reply);
+              if (reply) {
+                if (likeAction === 'like') {
+                  // reply.likes.push({ user: userId });
+                } else if (likeAction === 'dislike') {
+                  reply.likes = reply.likes.filter(like => like.user !== userId);
+                }
+              }
+            }
+
+         
+        },
         likeDiscussions:(
             state,
             action:PayloadAction<{discussionId:string,userId:string,action: 'like' | 'dislike'}>
         )=>{
 
           const { discussionId, userId, action: likeAction } = action.payload;
-            console.log("in dispatch reply discussion",discussionId);
+            console.log("in dispatch likeReducer discussion",discussionId);
             const discussion = state.discussions.find(d => d.id === discussionId);
   
             if (discussion) {
@@ -169,5 +202,5 @@ const discussionSlice=createSlice({
         }
     }
 })
-export const {  getDiscussions, nestedreply, closeDiscussions,  setFilterUserId,setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion } = discussionSlice.actions;
+export const {  getDiscussions, nestedreply, closeDiscussions,  setFilterUserId,setLoading,setError,postDiscussion,likeDiscussions,replyDiscussion,likeReply } = discussionSlice.actions;
 export default discussionSlice.reducer;

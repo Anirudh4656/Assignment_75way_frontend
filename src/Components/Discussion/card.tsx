@@ -99,10 +99,13 @@ if (token) {
             name:reply.name,
             id: reply._id
           })),
-          likes: discussion.likes, 
+          likes: discussion.likes.map((like:any)=>({
+            reply:like.reply,
+            user:like.user
+          })), 
           isClosed:discussion.isClosed// Assuming likes is an array of user ids
         }));
-
+        console.log("check rendering of transformedDiscussion card",transformedDiscussions);
         dispatch(getDiscussions({ discussions: transformedDiscussions }));
        
     

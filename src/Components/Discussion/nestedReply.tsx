@@ -30,7 +30,7 @@ const nestedReply: React.FC<{ id: string; discussId: string }> = ({
     console.log("findReplyById",replies,id)
     for (const reply of replies) {
       if (reply.id === id) {
-        console.log("in reply ",reply);
+        // console.log("in reply ",reply);
         return reply;
       }
     //   const nestedReply = findReplyById(reply.replies, id);
@@ -52,7 +52,7 @@ const handleLike=()=>{
       (discussion: any) => discussion.id === discussId
     );
     if (discussion) {
-      console.log("discussion", discussion);
+      // console.log("discussion", discussion);
       return findReplyById(discussion.replies, id);
     }
     return null;
@@ -61,18 +61,18 @@ const handleLike=()=>{
     selectReplyById(state, discussId, id)
   );
 
-  console.log("in nested comments reply discussion ", reply);
+  // console.log("in nested comments reply discussion ", reply);
 
   const handleSubmit = async (id: string) => {
-    console.log("in handleSubmit", id);
+    // console.log("in handleSubmit", id);
     try {
-      console.log("content is:", content);
+      // console.log("content is:", content);
       const response = await addNestedReply({
         content,
         discussionId: discussId,
         replyId: id,
       });
-      console.log("in handleSubmit of nestedreply", response);
+      // console.log("in handleSubmit of nestedreply", response);
       if (response.data) {
         const nestedR: Reply = {
           content: response.data.data.content,
@@ -82,7 +82,7 @@ const handleLike=()=>{
           replies: response.data.data.replies,
           likes: response.data.data.likes,
         };
-        console.log("response ", nestedreply);
+        // console.log("response ", nestedreply);
         dispatch(
           nestedreply({
             discussionId: discussId,
