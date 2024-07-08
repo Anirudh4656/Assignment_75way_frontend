@@ -52,10 +52,42 @@ const  RecipeReviewCard: () => JSX.Element=()=> {
   const dispatch=useDispatch<AppDispatch>();
 console.log("in discuss before use state",discussions)
   useEffect(()=>{
-
-    fetchDiscussions();
+ 
+    const fetchDiscussions = async ()=>{
+      try{
+        if(discussions){
+    
+          console.log("check rendering of component",discussions);
+          const transformedDiscussions: Discussion[] = discussions.data.map((discussion: any) => ({
+            id: discussion._id,
+            title: discussion.title,
+            content: discussion.content,
+            user: discussion.user,
+            name:discussion.name,
+            replies: discussion.replies.map((reply: any) => ({
+              content: reply.content,
+              user: reply.user,
+              name:reply.name,
+              id: reply._id
+            })),
+            likes: discussion.likes.map((like:any)=>({
+              reply:like.reply,
+              user:like.user
+            })), 
+            isClosed:discussion.isClosed// Assuming likes is an array of user ids
+          }));
+          console.log("check rendering of transformedDiscussion card",transformedDiscussions);
+          dispatch(getDiscussions({ discussions: transformedDiscussions }));
+         
+      
+        }
+      }catch(error:any){
+  
+        console.log("erroris",error.message);
+      }
+    }
+     fetchDiscussions();
     const token = localStorage.getItem('token');
-
 if (token) {
   try{
       const decodedToken = jwtDecode<MyToken>(token);
@@ -71,56 +103,16 @@ if (token) {
         
   }catch(error){console.error('failed todecode',error)}; }
    },[discussions,dispatch,refetchGetDiscussions ])
+ 
   
   const discussion = useSelector((state: RootState) => state.discuss.discussions);
   const filterUserId = useSelector((state: RootState) => state.discuss.filterUserId);
-
-  const result=discussion.filter((discuss:any)=>  {return discuss.user===filterUserId } )
-
-
-  const filteredDiscussions = filterUserId
-    ? discussion.filter((discuss:any) =>  {return discuss.user===filterUserId } )
-    : discussion; 
- console.log("in filtereddis",filteredDiscussions)
-   const fetchDiscussions = async ()=>{
-    try{
-      if(discussions){
-  
-        console.log("check rendering of component",discussions);
-        const transformedDiscussions: Discussion[] = discussions.data.map((discussion: any) => ({
-          id: discussion._id,
-          title: discussion.title,
-          content: discussion.content,
-          user: discussion.user,
-          name:discussion.name,
-          replies: discussion.replies.map((reply: any) => ({
-            content: reply.content,
-            user: reply.user,
-            name:reply.name,
-            id: reply._id
-          })),
-          likes: discussion.likes.map((like:any)=>({
-            reply:like.reply,
-            user:like.user
-          })), 
-          isClosed:discussion.isClosed// Assuming likes is an array of user ids
-        }));
-        console.log("check rendering of transformedDiscussion card",transformedDiscussions);
-        dispatch(getDiscussions({ discussions: transformedDiscussions }));
-       
-    
-      }
-    }catch(error:any){
-
-      console.log("erroris",error.message);
-    }
-  }
-
+ 
 
   return (
 <>
-    {filteredDiscussions && filteredDiscussions?.length > 0 ? ( <>
-        {filteredDiscussions.map((discussion:any)=> (
+    {discussion && discussion?.length > 0 ? ( <>
+        {discussion.map((discussion:any)=> (
          <Cards  discuss={discussion} /> ))}
 
 </>):(

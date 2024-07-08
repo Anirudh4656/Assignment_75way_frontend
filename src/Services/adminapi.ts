@@ -31,7 +31,7 @@ export const adminApi=createApi({
     endpoints:(builder)=>({
           getAllUser:builder.query<User[],void>({
          query:()=>({
-          url:'/getAllUsers',
+          url:'/users',
           headers: {
             'Authorization': `Bearer ${token}`
         }  })
@@ -39,7 +39,7 @@ export const adminApi=createApi({
 
           blockUser:builder.mutation<User,BlockUserPayload>({
             query:({userId})=>({
-                  url:`/blockUser/${userId}`,
+                  url:`/users/block/${userId}`,
                 method: 'PUT',
                 headers: {
                   'Authorization': `Bearer ${token}`
@@ -49,8 +49,8 @@ export const adminApi=createApi({
           }),
           deleteUser:builder.mutation<User,BlockUserPayload>({
             query:({userId})=>({
-                  url:`/deleteUser/${userId}`,
-                method: 'PUT',
+                  url:`/users/delete/${userId}`,
+                method: 'DELETE',
                 headers: {
                   'Authorization': `Bearer ${token}`
               } 
@@ -59,7 +59,7 @@ export const adminApi=createApi({
           }),
           close:builder.mutation<User,{id:string}>({
             query:({id})=>({
-              url:`/closeDiscussion/${id}`,
+              url:`/discussions/close/${id}`,
             method: 'PATCH',
             headers: {
               'Authorization': `Bearer ${token}`

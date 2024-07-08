@@ -1,62 +1,71 @@
-import { IconButton, InputAdornment, List, ListItem, ListItemText, OutlinedInput } from "@mui/material";
+import {
+  IconButton,
+  InputAdornment,
+  List,
+  OutlinedInput
+} from "@mui/material";
 import { useState } from "react";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { useAddNestedReplyMutation } from "../../Services/discussapi";
 import { AppDispatch, RootState } from "../../Store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { nestedreply } from "../../Store/reducers/discussionReducer";
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import NestedLike from "./nestedLike";
+
 interface Like {
   _id: string;
   id: string;
   user: string;
 }
 interface Reply {
-    id: string;
-    content: string;
-    user: string;
-    name:string;
-    replies: Reply[];
-    likes: Like[];
-  }
-const nestedReply: React.FC<{ id: string; discussId: string }> = ({
-  id,
-  discussId,
-}) => {
+  id: string;
+  content: string;
+  user: string;
+  name: string;
+  replies: Reply[];
+  likes: Like[];
+}
+interface newlike {
+  user: string;
+}
+const nestedReply: React.FC<{
+  id: string;
+  discussId: string;
+  user: string | undefined;
+}> = ({ id, discussId, user }) => {
+  console.log("nested id debugging step 1", id);
   const [content, setContent] = useState<string>("");
   const [addNestedReply] = useAddNestedReplyMutation();
+
   const dispatch = useDispatch<AppDispatch>();
+  // console.log("findReplyBynestedId", id, discussId, user);
   const findReplyById = (replies: Reply[], id: string): Reply | null => {
-    console.log("findReplyById",replies,id)
+    // console.log("findReplyById", replies, id);
     for (const reply of replies) {
       if (reply.id === id) {
         // console.log("in reply ",reply);
         return reply;
       }
-    //   const nestedReply = findReplyById(reply.replies, id);
-  
-    //   if (nestedReply) {
-    //     console.log("nested reply")
-    //     return nestedReply;
-    //   }
+      //   const nestedReply = findReplyById(reply.replies, id);
+
+      //   if (nestedReply) {
+      //     console.log("nested reply")
+      //     return nestedReply;
+      //   }
     }
     return null;
   };
-//6684eb95de93c2f0fbe097e7
 
-const handleLike=()=>{
-
-}
   const selectReplyById = (state: RootState, discussId: string, id: string) => {
     const discussion = state.discuss.discussions.find(
       (discussion: any) => discussion.id === discussId
     );
     if (discussion) {
-      // console.log("discussion", discussion);
       return findReplyById(discussion.replies, id);
     }
     return null;
   };
+
   const reply = useSelector((state: RootState) =>
     selectReplyById(state, discussId, id)
   );
@@ -118,25 +127,14 @@ const handleLike=()=>{
           </InputAdornment>
         }
       />
- <List sx={{ maxHeight: 100, overflow: "auto" }}>
-              {reply?.replies.map((r: any) => (
-                <>
-                <ListItem key={r.id}>
-                  <ListItemText
-                   secondary={r.content}
-                   primary={r.name}
-                  />
-                </ListItem>
-                 <FavoriteIcon
-                 onClick={() => handleLike()}
-                 aria-label="add to favorites"
-               >
-                 {/* <Likes /> */}
-               </FavoriteIcon>
-                {/* <NestedReply id={reply.id} discussId={discuss.id}/> */}
-               </>
-              ))}
-            </List>
+      <List sx={{ maxHeight: 100, overflow: "auto" }}>
+        {reply?.replies.map((r: any) => (
+          <>
+            <NestedLike r={r} discussionId={discussId} user={user} />
+            {/* <NestedReply id={reply.id} discussId={discuss.id}/> */}
+          </>
+        ))}
+      </List>
     </>
   );
 };

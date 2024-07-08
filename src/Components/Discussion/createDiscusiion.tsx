@@ -1,7 +1,7 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, {FormEvent, useState } from "react";
 import { useCreateDiscussionMutation} from '../../Services/discussapi'
-import { AppDispatch } from "../../Store/store";
-import { useDispatch } from "react-redux";
+import { AppDispatch, RootState, useAppSelector } from "../../Store/store";
+import { useDispatch, useSelector } from "react-redux";
 import {postDiscussion} from "../../Store/reducers/discussionReducer";
 import { Button, Paper, TextField } from "@mui/material";
 interface FormState{
@@ -13,15 +13,19 @@ interface Like{
     id:string;
     user:string;
   }
-interface Reply {
+  interface Reply {
+    id: string;
     content: string;
     user: string;
-    id:string;
- }
+    name:string;
+    replies: Reply[];
+    likes: Like[];
+  }
 interface Discussion {
     id: string;
     title: string;
     content: string;
+    name:string;
     user: string;
     likes:Like[];
     replies:Reply[];
@@ -30,17 +34,15 @@ interface Discussion {
   
 const initialState: FormState = { title:"",content:""};
 const createDiscussion:React.FC=()=>{
-// const user = JSON.parse(localStorage.getItem('token'));
-
 const [postData, setPostData] = useState<FormState>(initialState);
 const dispatch=useDispatch<AppDispatch>();
 const[ createDiscussion]=useCreateDiscussionMutation();
+const discussion = useAppSelector((state: RootState) => state.discuss.discussions);
+console.log("in new discussionsdsdssd",discussion)
 const handleSubmit = async (e:FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try{
-        const newDiscussion = await createDiscussion(postData);
-   
-
+         const newDiscussion = await createDiscussion(postData);
 if (newDiscussion.data) {
     // Accessing fields within response.data
     console.log("in new discussion",newDiscussion)
@@ -50,10 +52,11 @@ if (newDiscussion.data) {
         title: newDiscussion.data.data.title,
         user: newDiscussion.data.data.user,
         likes:newDiscussion.data.data.likes,
+        name:newDiscussion.data.data.name,
         replies:newDiscussion.data.data.replies,
         isClosed:newDiscussion.data.data.isClosed
     };
-  
+    console.log("in new discussion",newDiscussion)
 dispatch(postDiscussion(newDiscuss));
 setPostData(initialState)
    

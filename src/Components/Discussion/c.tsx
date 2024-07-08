@@ -1,4 +1,4 @@
-import React, { Key, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
@@ -14,46 +14,41 @@ import Typography from "@mui/material/Typography";
 import { red } from "@mui/material/colors";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import NestedReply from "./nestedReply"
+import NestedReply from "./nestedReply";
+import DiscussionReplyLike from "./discussreplylike";
 import {
   InputAdornment,
   List,
-  ListItem,
-  ListItemText,
-  OutlinedInput,
+  OutlinedInput
 } from "@mui/material";
-import {
-  useGetDiscussionQuery,
-  useLikeDiscussionMutation,
-} from "../../Services/discussapi";
 import { useCloseMutation } from "../../Services/adminapi";
 import {
   getDiscussions,
   likeDiscussions,
-  likeReply
+  replyDiscussion,
+  closeDiscussions
 } from "../../Store/reducers/discussionReducer";
 import {
-  replyDiscussion,
-  closeDiscussions,
-} from "../../Store/reducers/discussionReducer";
-import { useAddReplyMutation, useAddReplyLikeMutation,useAddNestedReplyMutation } from "../../Services/discussapi";
-import { AppDispatch, RootState, useAppSelector } from "../../Store/store";
+  useAddReplyMutation,
+  useAddReplyLikeMutation,
+  useGetDiscussionQuery,
+  useLikeDiscussionMutation
+} from "../../Services/discussapi";
+import { AppDispatch, RootState } from "../../Store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { JwtPayload, jwtDecode } from "jwt-decode";
 import { ThumbUpAltOutlined } from "@mui/icons-material";
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
-interface Like{
-  _id:string;
-  id:string;
-  user:string;
+interface Like {
+  _id: string;
+  id: string;
+  user: string;
 }
 interface Reply {
   id: string;
   content: string;
   user: string;
-  name:string;
+  name: string;
   replies: Reply[];
   likes: Like[];
 }
@@ -69,14 +64,13 @@ interface Discussion {
   _id: string;
   id: string;
   title: string;
-  name:string;
+  name: string;
   content: string;
   user: string;
   replies: Reply[];
   likes: Like[];
   isClosed: boolean;
 }
-
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -103,11 +97,8 @@ const Cards: React.FC<DiscussProps> = ({ discuss }) => {
   const [user, setUser] = useState<MyToken | null>(null);
   const [content, setContent] = useState<string>("");
   const [role, setRole] = useState<boolean>(false);
-  //change
   const [likediscuss, setLikediscuss] = useState<newlike[]>(discuss?.likes);
-  const [replyL, setReplyL] = useState<newlike[]>(discuss?.likes);
-  console.log("replyLike discuss",discuss);
-  console.log("replyLike",replyL);
+  console.log("replyLike discuss", discuss);
   const [addReply] = useAddReplyMutation();
   const { data: discussions, refetch: refetchGetDiscussions } =
     useGetDiscussionQuery();
@@ -116,10 +107,7 @@ const Cards: React.FC<DiscussProps> = ({ discuss }) => {
   const discussion = useSelector(
     (state: RootState) => state.discuss.discussions
   );
-
-  const filterUserId = useSelector((state: RootState) => state.discuss);
   const [likeDiscussion] = useLikeDiscussionMutation();
-  const [addReplyLike] = useAddReplyLikeMutation();
   useEffect(() => {
     fetchDiscussions();
     const token = localStorage.getItem("token");
@@ -139,7 +127,7 @@ const Cards: React.FC<DiscussProps> = ({ discuss }) => {
         console.error("failed todecode", error);
       }
     }
-  }, [discussions, dispatch, refetchGetDiscussions]);
+  }, [discussions,dispatch,refetchGetDiscussions]);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -154,7 +142,7 @@ const Cards: React.FC<DiscussProps> = ({ discuss }) => {
   const fetchDiscussions = async () => {
     try {
       if (discussions) {
-        console.log("check rendering of component",discussions);
+        console.log("check rendering of component", discussions);
         const transformReplies = (replies: any[]): Reply[] => {
           return replies.map((reply: any) => ({
             id: reply._id,
@@ -170,25 +158,27 @@ const Cards: React.FC<DiscussProps> = ({ discuss }) => {
             id: discussion._id,
             title: discussion.title,
             content: discussion.content,
-            name:discussion.name,
+            name: discussion.name,
             user: discussion.user,
             replies: discussion.replies.map((reply: any) => ({
               content: reply.content,
               user: reply.user,
               id: reply._id,
-              likes:reply.likes,
-              name:reply.name,
-              replies:transformReplies(reply.replies|| [])
-            
+              likes: reply.likes,
+              name: reply.name,
+              replies: transformReplies(reply.replies || []),
             })),
-            likes: discussion.likes.map((like:any)=>({
-              reply:like.reply,
-              user:like.user
-            })), 
+            likes: discussion.likes.map((like: any) => ({
+              reply: like.reply,
+              user: like.user,
+            })),
             isClosed: discussion.isClosed,
           })
         );
-        console.log("check rendering of transformedDiscussion",transformedDiscussions);
+        console.log(
+          "check rendering of transformedDiscussion",
+          transformedDiscussions
+        );
         dispatch(getDiscussions({ discussions: transformedDiscussions }));
       }
     } catch (error: any) {
@@ -208,7 +198,7 @@ const Cards: React.FC<DiscussProps> = ({ discuss }) => {
           id: response.data.data._id,
           name: response.data.data.name,
           replies: response.data.data.replies,
-          likes: response.data.data.likes
+          likes: response.data.data.likes,
         };
         console.log("response ", reply);
         dispatch(replyDiscussion({ discussionId: id, content: reply }));
@@ -220,64 +210,7 @@ const Cards: React.FC<DiscussProps> = ({ discuss }) => {
     }
   };
 
-  const handleReplyLike = async ({ reply, discussionId }: { reply: Reply, discussionId: string } ) => {
-   console.log("in handle like", user?.id);
 
- 
-   try {
-        const replylike=await addReplyLike({id:reply.id});
-        console.log('in replyLike function',replylike);
-        if (replylike) {
-          console.log("in likes", replylike);
-        } 
-        if (user?.id && replylike ) {  
-                const hasLikedPost = reply?.likes.some(
-                  (like: any) => like.user === user.id
-                );
-                console.log("in handlereplyliked post", hasLikedPost);
-                if (hasLikedPost) {
-                  const result = reply?.likes.filter(
-                    (like: any) => like.user !== user?.id
-                  );
-                  console.log("result of like", result); 
-                  setReplyL(result ||[]);
-    console.log("after setreply",replyL)
-                  dispatch(likeReply({
-                                replyId:reply.id,
-                                discussionId: discussionId,
-                                userId: user.id,
-                                action: "dislike",
-                              })
-                            );
-                            console.log("in usestae", likediscuss);
-                          
-        } else{
-                  console.log("user liked");
-                  const newLike = { user: user.id };
-                  const updatedLikes = [...reply.likes, newLike];
-                  console.log("Updated likes after addition:", updatedLikes);
-                  setReplyL(updatedLikes ||[]);
-                  console.log("after setreply",replyL)
-                  dispatch(
-                    likeReply({
-                      replyId:reply.id,
-                      discussionId,
-                      userId: user.id,
-                      action: "like",
-                    })
-                  );
-         console.log("in usestae", likediscuss);
-      
-                }   
-      
-      
-      }
-   }catch(e){
-    console.log(e);
-   }
-
-
-}
   const handleLike = async (id: string) => {
     //userid
     console.log("in hqndle like", user?.id);
@@ -337,33 +270,17 @@ const Cards: React.FC<DiscussProps> = ({ discuss }) => {
       console.log(e);
     }
   };
+  //userstate
   const handleClose = async (id: string) => {
     const closed = await close({ id: id });
     console.log("in hadle clse", id, closed);
     dispatch(closeDiscussions({ id }));
   };
-  const ReplyLikes =()=>{
-    console.log("in ReplyLikes", user?.id);
-    if (replyL.length > 0) {
-      return replyL?.find((like) => like) ? (
-        <>
-          <FavoriteIcon />
-          &nbsp;
-          {replyL.length}
-        </>
-      ) : (
-        <>
-          <FavoriteBorderIcon />
-          &nbsp;{replyL.length}{" "}
 
-        </>
-      );
-  }
-}
   const Likes = () => {
     // console.log(like.map(like)=>like);
     if (likediscuss.length > 0) {
-      return likediscuss?.find((like) => like) ? (
+      return likediscuss?.find((like) => like.user === user?.id) ? (
         <>
           <ThumbUpIcon fontSize="small" />
           &nbsp;
@@ -451,24 +368,13 @@ const Cards: React.FC<DiscussProps> = ({ discuss }) => {
             <List sx={{ maxHeight: 100, overflow: "auto" }}>
               {discuss.replies.map((reply: any) => (
                 <>
-                <ListItem key={reply.id}>
-                  <ListItemText
-                   secondary={reply.content}
-                   primary={reply.name}
+                 <DiscussionReplyLike  user={user?.id} reply={reply} discussionId= {discuss.id}   />
+                  <NestedReply
+                    id={reply.id}
+                    discussId={discuss.id}
+                    user={user?.id}
                   />
-                </ListItem>
-                <IconButton
-              onClick={() => handleReplyLike({reply ,discussionId:discuss.id})}
-              aria-label="add to favorites"
-            >
-              <ReplyLikes />
-            </IconButton>
-                 
-  
-              
-               
-                <NestedReply id={reply.id} discussId={discuss.id}/>
-               </>
+                </>
               ))}
             </List>
 

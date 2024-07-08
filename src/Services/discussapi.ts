@@ -13,12 +13,17 @@ export const discussApi=createApi({
     
     endpoints:(builder)=>({
           getDiscussion:builder.query<Discussion,void>({
-         query:()=>'/getDiscussion'
+         query:()=>({
+          url:'/discussions',
+          headers: {
+            'Authorization': `Bearer ${token}`
+        }
+         })
           }),
           
           createDiscussion:builder.mutation<Discussion,{title:string,content:string}>({
             query:({title ,content})=>({
-                url:'/createDiscussion',
+                url:'/discussions',
                 method:'POST',
                 body:{title,content},
                 headers: {
@@ -29,9 +34,8 @@ export const discussApi=createApi({
           }),
           likeDiscussion:builder.mutation<Discussion,{id:string}>({
             query:({id})=>({
-                url:`/likeDiscussion/${id}`,
+                url:`/discussions/${id}/like`,
                 method:'PATCH',
-                body:{id},
                 headers: {
                   'Authorization': `Bearer ${token}`
               }
@@ -40,19 +44,18 @@ export const discussApi=createApi({
           }),
           addReplyLike:builder.mutation<Discussion,{id:string}>({
             query:({id})=>({
-              url:`/likeReply/${id}`,
+              url:`/discussions/replies/:${id}/like`,
               method:'PATCH',
-              body:{id},
               headers: {
                 'Authorization': `Bearer ${token}`
             }
             })
           }),
-          addReply:builder.mutation<Discussion,{discussionId:string,content:string}>({
-            query:({discussionId,content })=>({
-                url:`/replyDiscussion/${discussionId}`,
+          addReply:builder.mutation<Discussion,{id:string,content:string}>({
+            query:({id,content })=>({
+                url:`/discussions/${id}/reply`,
                 method:"PATCH",
-                body:{discussionId,content},
+                body:{content},
                 headers: {
                   'Authorization': `Bearer ${token}`
               }
@@ -60,9 +63,9 @@ export const discussApi=createApi({
           }),
           addNestedReply:builder.mutation<Discussion,{content:string,replyId:string,discussionId:string}>({
             query:({content,replyId,discussionId})=>({
-              url:'/nestedReply',
+              url:`/discussions/:${discussionId}/replies/:${replyId}/reply`,
               method:"PATCH",
-              body:{discussionId,content,replyId},
+              body:{content},
               headers: {
                 'Authorization': `Bearer ${token}`
             }
